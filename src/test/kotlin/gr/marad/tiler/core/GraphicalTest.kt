@@ -2,7 +2,6 @@ package gr.marad.tiler.core
 
 import gh.marad.tiler.core.*
 import io.kotest.property.Arb
-import io.kotest.property.Gen
 import io.kotest.property.arbitrary.arbitrary
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.next
@@ -10,14 +9,14 @@ import org.jetbrains.skija.*
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
-import java.awt.Desktop
+import kotlin.system.exitProcess
 
-val typeface = Typeface.makeDefault()
+//val typeface = Typeface.makeDefault()
 
 var width = 640
 var height = 480
 //val tiler = Tiler(VerticalStackLayout(LayoutSpace(0, 0, width, height)))
-val tiler = Tiler(TwoColumnLayout(LayoutSpace(0, 0, width, height)))
+val tiler = Tiler(TwoColumnLayout(LayoutSpace(0, 0, width, height))) { desktopWindows.toDesktopState() }
 
 val xGen2 = Arb.int(0, width-10)
 val yGen2 = Arb.int(0, height-10)
@@ -41,41 +40,89 @@ fun MutableList<WindowInfo>.toDesktopState() = DesktopState(this.map { it.window
 val colors = mutableMapOf<String, Paint>()
 
 fun init(windowHandle: Long) {
+    var mouseX = 0
+    var mouseY = 0
+
     glfwSetKeyCallback(windowHandle) { window, key, scanCode, action, mods ->
         if (key == GLFW_KEY_A && action == GLFW_PRESS) {
             val windowID = testIdGen.next()
-            val window = Window(TestWindowId(windowID), "Name", "class", posGen2.next())
+            val window = Window(TestWindowId(windowID), "Name", "class", "exe_path", posGen2.next(), false)
             colors.put(windowID, paintGen.next())
             desktopWindows.add(WindowInfo(window, false))
-            val cmds = tiler.windowAppeared(window, desktopWindows.toDesktopState())
-            println(cmds)
+            val cmds = tiler.windowAppeared(window)
             applyCommands(cmds)
         }
 
         if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-            val windowToRemove = desktopWindows.removeLastOrNull()
-            if (windowToRemove != null) {
-                val cmds = tiler.windowDisappeared(windowToRemove.window, desktopWindows.toDesktopState())
-                println(cmds)
+            val windowAtCursor = getWindowAt(mouseX, mouseY) ?: desktopWindows.lastOrNull()?.window
+            if (windowAtCursor != null) {
+                desktopWindows.removeIf { windowAtCursor== it.window }
+                val cmds = tiler.windowDisappeared(windowAtCursor)
                 applyCommands(cmds)
             }
         }
 
+        if (key == GLFW_KEY_M && action == GLFW_PRESS) {
+            val windowAtCursor = getWindowAt(mouseX, mouseY)
+            if (windowAtCursor != null) {
+                desktopWindows.replaceAll {
+                    if (it.window.id == windowAtCursor.id) {
+                        it.copy(minimized = true)
+                    } else { it }
+                }
+                tiler.windowMinimized(windowAtCursor)
+                    .also { applyCommands(it) }
+            }
+        }
+
+        if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+            val windowToRestore = desktopWindows.find { it.minimized }?.window
+            if (windowToRestore != null) {
+                desktopWindows.replaceAll {
+                    if (it.window.id == windowToRestore.id) {
+                        it.copy(minimized = false)
+                    } else { it }
+                }
+                tiler.windowRestored(windowToRestore)
+                    .also(::applyCommands)
+            }
+        }
+
+
         if (key in GLFW_KEY_0..GLFW_KEY_9 && action == GLFW_PRESS) {
-            val viewId = key - GLFW_KEY_0
-            val cmds = tiler.activateView(viewId, desktopWindows.toDesktopState())
+            val viewId = key - GLFW_KEY_0 - 1
+            val cmds = tiler.activateView(viewId)
             applyCommands(cmds)
         }
 
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwTerminate()
+            exitProcess(0)
         }
+    }
+
+
+    glfwSetCursorPosCallback(windowHandle) { window, x, y ->
+        mouseX = x.toInt()
+        mouseY = y.toInt()
     }
 
     glfwSetMouseButtonCallback(windowHandle) { window, button, action, mods ->
         println("Mouse: $button, $action, $mods")
+        println("Pos: $mouseX, $mouseY")
     }
+
 }
+
+fun getWindowAt(x: Int, y: Int): Window? {
+    return desktopWindows.filter {
+        val pos = it.window.position
+        !it.minimized &&
+                x >= pos.x && x <= pos.x + pos.width &&
+                y >= pos.y && y <= pos.y + pos.height
+    }.singleOrNull()?.window
+}
+
 
 fun applyCommands(cmds: List<TilerCommand>) {
     cmds.forEach { cmd ->
@@ -192,7 +239,7 @@ fun main() {
         )
 
         println("Retiling!")
-        tiler.retile(desktopWindows.toDesktopState())
+        tiler.retile()
         tiler.updateSpace(LayoutSpace(0, 0, w, h))
     }
 

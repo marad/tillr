@@ -2,8 +2,7 @@ package gr.marad.tiler.core
 
 import gh.marad.tiler.core.*
 import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.collections.shouldNotContain
+import io.kotest.matchers.equals.shouldNotBeEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
 import io.kotest.property.RandomSource
@@ -48,14 +47,14 @@ val posGen = arbitrary { rs: RandomSource ->
 }
 
 val windowGen = arbitrary { rs ->
-    Window(windowIdGen.next(rs), windowTitles.next(rs), classNames.next(rs), posGen.next(rs))
+    Window(windowIdGen.next(rs), windowTitles.next(rs), classNames.next(rs), "exe_path", posGen.next(rs), false)
 }
 
 fun window(title: String? = null, className: String? = null, position: WindowPosition? = null): Window {
     val finalTitle = title ?: windowTitles.next()
     val finalClassName = className ?: classNames.next()
     val finalPosition = position ?: posGen.next()
-    return Window(windowIdGen.next(), finalTitle, finalClassName, finalPosition)
+    return Window(windowIdGen.next(), finalTitle, finalClassName, "exe_path", finalPosition, minimized = false)
 }
 
 fun wmWith(vararg windows: Window): WindowManager = TestWindowManager(windows.toList())
@@ -103,14 +102,14 @@ class ViewTest {
     @Test
     fun `should add window`() {
         // given
-        val aWindow = windowGen.next()
+        val window = windowGen.next()
         val aView = View(layout = TestLayout())
 
         // when
-        aView.addWindow(aWindow)
+        aView.addWindow(window.id)
 
         // then
-        aView shouldContain aWindow
+        aView.hasWindow(window.id) shouldBe true
     }
 
     @Test
@@ -120,69 +119,42 @@ class ViewTest {
         val aView = View(layout = TestLayout())
 
         // when
-        aView.addWindow(aWindow)
-        aView.addWindow(aWindow)
+        aView.addWindow(aWindow.id)
+        aView.addWindow(aWindow.id)
 
         // then
-        aView shouldHaveSize 1
+        aView.hasWindow(aWindow.id) shouldBe true
     }
 
     @Test
     fun `should remove window by its ID`() {
         // given
         val aWindow = windowGen.next()
-        val aView = View(mutableListOf(aWindow), TestLayout())
+        val aView = View(mutableListOf(aWindow.id), TestLayout())
 
         // when
         aView.removeWindow(aWindow.id)
 
         // then
-        aView shouldHaveSize 0
+        aView.hasWindow(aWindow.id) shouldBe false
     }
 }
 
 class ViewManagerTest {
     @Test
-    fun `should add window to current view`() {
-        // given
-        val aWindow = windowGen.next()
-        val aViewManager = ViewManager(TestLayout())
-
-        // when
-        aViewManager.addWindow(aWindow)
-
-        // then
-        aViewManager.currentViewWindows() shouldContain aWindow
-    }
-
-    @Test
-    fun `should allow removing the window by ID`() {
-        // given
-        val aWindow = windowGen.next()
-        val aViewManager = ViewManager(TestLayout())
-        aViewManager.addWindow(aWindow)
-
-        // when
-        aViewManager.removeWindow(aWindow.id)
-
-        // then
-        aViewManager.currentViewWindows() shouldHaveSize 0
-    }
-
-    @Test
     fun `should allow changing the view`() {
         // given
         val aWindow = windowGen.next()
         val aViewManager = ViewManager(TestLayout())
+        val defaultView = aViewManager.currentView()
 
         // when
-        aViewManager.addWindow(aWindow)
-        aViewManager.changeCurrentView(1)
+        aViewManager.currentView().addWindow(aWindow.id)
+        val secondView = aViewManager.changeCurrentView(1)
 
         // then
-        aViewManager.currentViewWindows() shouldNotContain aWindow
-        aViewManager.changeCurrentView(0)
-        aViewManager.currentViewWindows() shouldContain aWindow
+        defaultView.hasWindow(aWindow.id) shouldBe true
+        secondView.hasWindow(aWindow.id) shouldBe false
     }
 
     @Test
@@ -190,15 +162,17 @@ class ViewManagerTest {
         // given
         val aWindow = windowGen.next()
         val aViewManager = ViewManager(TestLayout())
+        val defaultView = aViewManager.currentView()
+
 
         // when
-        aViewManager.addWindow(aWindow)
-        aViewManager.changeCurrentView(1)
-        aViewManager.addWindow(aWindow)
+        aViewManager.currentView().addWindow(aWindow.id)
+        val secondView = aViewManager.changeCurrentView(1)
+        aViewManager.currentView().addWindow(aWindow.id)
 
         // then
-        aViewManager.currentViewWindows() shouldContain aWindow
-        aViewManager.changeCurrentView(0)
-        aViewManager.currentViewWindows() shouldContain aWindow
+        defaultView.hasWindow(aWindow.id) shouldBe true
+        secondView.hasWindow(aWindow.id) shouldBe true
+        defaultView shouldNotBeEqual secondView
     }
 }

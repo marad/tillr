@@ -1,6 +1,5 @@
 package gr.marad.tiler.core
 
-import gh.marad.tiler.core.DesktopState
 import gh.marad.tiler.core.LayoutSpace
 import gh.marad.tiler.core.VerticalStackLayout
 import io.kotest.matchers.ints.shouldBeExactly
