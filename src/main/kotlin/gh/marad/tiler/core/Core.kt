@@ -98,7 +98,11 @@ data class WindowPosition(val x: Int, val y: Int, val width: Int, val height: In
 data class Window(val id: WindowId,
                   val windowName: String,
                   val className: String,
-                  val position: WindowPosition) {
+                  val exePath: String,
+                  val position: WindowPosition,
+                  val minimized: Boolean,
+    ) {
+    val exeName = exePath.split("\\").last()
     fun reposition(x: Int?, y: Int?, width: Int? = null, height: Int? = null): Window {
         return copy(position = WindowPosition(
             x = x ?: position.x,
@@ -126,10 +130,10 @@ fun activate(allManagedWindows: Windows, windowsInView: Windows): List<TilerComm
     return commands
 }
 
-fun calcWindowMovements(windowsInView: Windows, positionedWindows: Windows): List<TilerCommand> {
+fun calcWindowMovements(allWindows: Windows, positionedWindows: Windows): List<TilerCommand> {
     val positionedWindowsById = positionedWindows.associateBy { it.id }
     val commands = mutableListOf<TilerCommand>()
-    windowsInView.forEach {
+    allWindows.forEach {
         val positionedWindow = positionedWindowsById[it.id]
         if (positionedWindow != null && it.position != positionedWindow.position) {
             commands.add(SetWindowPosition(it.id, positionedWindow.position))
@@ -139,106 +143,116 @@ fun calcWindowMovements(windowsInView: Windows, positionedWindows: Windows): Lis
 }
 
 class View(
-    private var windows: MutableList<Window> = mutableListOf(),
-    layout: Layout
-) : Iterable<Window> {
+    private var windows: MutableList<WindowId> = mutableListOf(),
+    var layout: Layout
+) {
 
-    var layout = layout
-
-    fun addWindow(window: Window) {
-        if (!windows.any { it.id == window.id }) {
-            windows.add(window)
-            retile()
+    fun addWindow(windowId: WindowId) {
+        if (!windows.contains(windowId)) {
+            windows.add(windowId)
         }
     }
 
     fun removeWindow(windowId: WindowId) {
-        windows.removeIf { it.id == windowId }
-        retile()
+        windows.removeIf { it == windowId }
     }
 
-    fun retile() {
-        windows = layout.retile(windows).toMutableList()
-    }
+    fun hasWindow(windowId: WindowId): Boolean = windows.contains(windowId)
 
-    override fun iterator(): Iterator<Window> = windows.iterator()
+    fun filterWindowsInView(windows: Windows): Windows {
+        // it's done this way instead of `windows.filter` to preserve
+        // the ordering of windows in the view
+        val windowsById = windows.associateBy { it.id }
+        return this.windows.mapNotNull { windowsById[it] }
+    }
+    fun filterWindowsNotInView(windows: Windows): Windows = windows.filterNot { hasWindow(it.id) }
+
+    fun swapWindows(a: WindowId, b: WindowId) {
+        val aIdx = windows.indexOf(a)
+        val bIdx = windows.indexOf(b)
+        if (aIdx < 0 || bIdx < 0) return
+        val tmp = windows[aIdx]
+        windows[aIdx] = windows[bIdx]
+        windows[bIdx] = tmp
+    }
 }
 
 class ViewManager(private val defaultLayout: Layout) {
     private var _activeViewId: Int = 0
     private val _views = mutableMapOf(0 to View(layout = defaultLayout))
 
-    fun updateSpace(space: LayoutSpace) {
+    fun updateLayoutSpace(space: LayoutSpace) {
         defaultLayout.updateSpace(space)
         _views.values.forEach {
             it.layout.updateSpace(space)
         }
     }
 
-    private fun currentView(): View  {
+    fun currentView(): View  {
       return _views.getOrPut(_activeViewId) { View(layout = defaultLayout) }
     }
 
-    fun addWindow(window: Window) {
-        currentView().addWindow(window)
+    fun changeCurrentView(viewId: Int): View {
+        _activeViewId = viewId
+        return currentView()
     }
-
-    fun removeWindow(windowId: WindowId) {
-        currentView().removeWindow(windowId)
-    }
-
-    fun currentViewWindows(): Windows = currentView().toList()
-
-    fun retile(): Windows {
-        currentView().retile()
-        return currentViewWindows()
-    }
-
-    fun changeCurrentView(viewId: Int) { _activeViewId = viewId }
 }
 
 data class DesktopState(
     val windows: Windows,
 )
 
-class Tiler(defaultLayout: Layout) {
+class Tiler(defaultLayout: Layout, private val getDesktopState: () -> DesktopState) {
     private val views = ViewManager(defaultLayout)
 
     fun updateSpace(space: LayoutSpace) {
-        views.updateSpace(space)
+        views.updateLayoutSpace(space)
     }
 
-    fun activateView(viewId: Int, desktopState: DesktopState): List<TilerCommand> {
+    fun activateView(viewId: Int): List<TilerCommand> {
         views.changeCurrentView(viewId)
-        return activate(desktopState.windows, views.currentViewWindows())
+        val desktopState = getDesktopState()
+        val view = views.changeCurrentView(viewId)
+        val minimizeCommands = view.filterWindowsNotInView(desktopState.windows)
+            .filterNot { it.minimized }
+            .map { MinimizeWindow(it.id) }
+        return minimizeCommands + retile()
     }
 
-    fun retile(desktopState: DesktopState): List<TilerCommand> {
-        val positionedWindows = views.retile()
+    fun retile(): List<TilerCommand> {
+        val desktopState = getDesktopState()
+        val view = views.currentView()
+        desktopState.windows.filterNot { it.minimized }
+            .forEach { view.addWindow(it.id) }
+        val windowsInView = view.filterWindowsInView(desktopState.windows)
+        val positionedWindows = view.layout.retile(windowsInView)
         return calcWindowMovements(desktopState.windows, positionedWindows)
     }
 
-    fun windowAppeared(window: Window, desktopState: DesktopState): List<TilerCommand> {
-        views.addWindow(window)
-        return retile(desktopState)
+    fun windowAppeared(window: Window): List<TilerCommand> {
+        views.currentView().addWindow(window.id)
+        return retile()
     }
 
-    fun windowDisappeared(window: Window, desktopState: DesktopState): List<TilerCommand> {
-        views.removeWindow(window.id)
-        return retile(desktopState)
+    fun windowDisappeared(window: Window): List<TilerCommand> {
+        views.currentView().removeWindow(window.id)
+        return retile()
     }
 
-    fun windowMinimized(window: Window, desktopState: DesktopState): List<TilerCommand> {
-        views.removeWindow(window.id)
-        return retile(desktopState)
+    fun windowMinimized(window: Window): List<TilerCommand> {
+        views.currentView().removeWindow(window.id)
+        return retile()
     }
 
-    fun windowMaximized(window: Window, desktopState: DesktopState): List<TilerCommand> {
-        return emptyList()
+    fun windowRestored(window: Window): List<TilerCommand> {
+        views.currentView().addWindow(window.id)
+        return retile()
     }
 
-    fun windowRestored(window: Window, desktopState: DesktopState): List<TilerCommand> {
-        views.addWindow(window)
-        return retile(desktopState)
+    fun swapWindows(a: WindowId, b: WindowId) {
+        views.currentView().swapWindows(a,b)
     }
+
+    fun inView(id: WindowId): Boolean =
+        views.currentView().hasWindow(id)
 }
