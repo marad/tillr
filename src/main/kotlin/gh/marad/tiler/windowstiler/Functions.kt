@@ -31,7 +31,6 @@ fun executeCommand(it: TilerCommand) = when(it) {
         // correct the window size to account for the invisible
         // border of the window
         val pos = it.position.addInvisibleBorders()
-//        User32.INSTANCE.ShowWindow(hwnd, User32.SW_NORMAL)
         User32.INSTANCE.SetWindowPos(hwnd, null,
             pos.x, pos.y, pos.width, pos.height,
             User32.SWP_ASYNCWINDOWPOS and User32.SWP_NOACTIVATE and User32.SWP_NOZORDER and User32.SWP_SHOWWINDOW)
@@ -40,6 +39,12 @@ fun executeCommand(it: TilerCommand) = when(it) {
     is MinimizeWindow -> {
         val hwnd = (it.windowId as WID).handle
         User32.INSTANCE.ShowWindow(hwnd, User32.SW_SHOWMINNOACTIVE)
+    }
+
+    is ShowWindow -> {
+        val hwnd = (it.windowId as WID).handle
+        User32.INSTANCE.ShowWindow(hwnd, User32.SW_SHOWNOACTIVATE)
+        User32.INSTANCE.RedrawWindow(hwnd, null, null, WinDef.DWORD(User32.RDW_INVALIDATE.toLong()))
     }
 }
 

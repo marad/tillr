@@ -16,6 +16,8 @@ data class SetWindowPosition(val windowId: WindowId, val position: WindowPositio
  */
 data class MinimizeWindow(val windowId: WindowId) : TilerCommand
 
+data class ShowWindow(val windowId: WindowId) : TilerCommand
+
 /**
  * Represents a window identifier
  */
@@ -220,10 +222,13 @@ class Tiler(defaultLayout: Layout, private val getDesktopState: () -> DesktopSta
     fun activateView(viewId: Int): List<TilerCommand> {
         val desktopState = getDesktopState()
         val view = views.changeCurrentView(viewId)
+        val showCommands = view.filterWindowsInView(desktopState.windows)
+            .filter { it.minimized }
+            .map { ShowWindow(it.id) }
         val minimizeCommands = view.filterWindowsNotInView(desktopState.windows)
             .filterNot { it.minimized }
             .map { MinimizeWindow(it.id) }
-        return minimizeCommands + retile()
+        return minimizeCommands + showCommands + retile()
     }
 
     fun retile(): List<TilerCommand> {
