@@ -5,7 +5,7 @@ import gh.marad.tiler.winapi.*
 import gh.marad.tiler.windowstiler.*
 
 
-// TODO view switching
+// TODO activate last active window
 // TODO moving window to other view
 // TODO allow for external configuration
 // TODO better layouts (eg. borders, customizable ratios, BSP layout)
@@ -15,7 +15,6 @@ val overrides = listOf(
     ManageOverride(true) { win -> win.getTitle() == "Microsoft To Do" && win.getRealClassName() == "ApplicationFrameWindow"},
     ManageOverride(false) { win -> win.getRealClassName() == "ApplicationFrameTitleBarWindow" },
     ManageOverride(false) { win -> win.getTitle().isBlank() && win.getProcess().exeName() == "idea64.exe"},
-    ManageOverride(false) { win -> win.getRealClassName() == "TaskManagerWindow" }
 )
 
 fun main(args: Array<String>) {

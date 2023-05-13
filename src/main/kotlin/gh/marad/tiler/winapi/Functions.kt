@@ -22,10 +22,12 @@ fun listWindows(): List<Window> {
         val win = Window(handle)
         val isNotCloaked = !DwmApi.isCloaked(handle)
         val isNotAToolWindow = !win.getExStyle().toolWindow()
+        val isNotATaskManager = win.getRealClassName() != "TaskManagerWindow"
 
         if (
             isNotAToolWindow
             && isNotCloaked
+            && isNotATaskManager
             && win.isWindow()
             && win.isVisible()
         ) {
