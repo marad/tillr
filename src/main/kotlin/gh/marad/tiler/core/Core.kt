@@ -18,6 +18,8 @@ data class MinimizeWindow(val windowId: WindowId) : TilerCommand
 
 data class ShowWindow(val windowId: WindowId) : TilerCommand
 
+data class ActivateWindow(val windowId: WindowId) : TilerCommand
+
 /**
  * Represents a window identifier
  */
@@ -148,6 +150,14 @@ class View(
     private var windows: MutableList<WindowId> = mutableListOf(),
     var layout: Layout
 ) {
+    private var activeWindow: WindowId? = null
+
+    fun windowToActivate(): WindowId? =
+        activeWindow ?: windows.firstOrNull()
+
+    fun activeWindow(windowId: WindowId) {
+        activeWindow = windowId
+    }
 
     fun addWindow(windowId: WindowId) {
         if (!windows.contains(windowId)) {
@@ -228,7 +238,14 @@ class Tiler(defaultLayout: Layout, private val getDesktopState: () -> DesktopSta
         val minimizeCommands = view.filterWindowsNotInView(desktopState.windows)
             .filterNot { it.minimized }
             .map { MinimizeWindow(it.id) }
-        return minimizeCommands + showCommands + retile()
+        val windowToActivate = view.windowToActivate()
+
+        return (minimizeCommands + showCommands + retile())
+            .let {
+                if (windowToActivate != null) {
+                    it + ActivateWindow(windowToActivate)
+                } else it
+            }
     }
 
     fun retile(): List<TilerCommand> {
@@ -240,6 +257,11 @@ class Tiler(defaultLayout: Layout, private val getDesktopState: () -> DesktopSta
         view.updateWindowsInView(windowsInView.map { it.id })
         val positionedWindows = view.layout.retile(windowsInView)
         return calcWindowMovements(desktopState.windows, positionedWindows)
+    }
+
+    fun windowActivated(window: Window): List<TilerCommand> {
+        views.currentView().activeWindow(window.id)
+        return retile()
     }
 
     fun windowAppeared(window: Window): List<TilerCommand> {

@@ -46,6 +46,14 @@ fun executeCommand(it: TilerCommand) = when(it) {
         User32.INSTANCE.ShowWindow(hwnd, User32.SW_SHOWNOACTIVATE)
         User32.INSTANCE.RedrawWindow(hwnd, null, null, WinDef.DWORD(User32.RDW_INVALIDATE.toLong()))
     }
+
+    is ActivateWindow -> {
+        val hwnd = (it.windowId as WID).handle
+        // sometimes when switching the view window activation would not work
+        // retry could be needed, if problem still occurs
+        Thread.sleep(100)
+        User32.INSTANCE.SetForegroundWindow(hwnd)
+    }
 }
 
 fun List<TilerCommand>.execute() = forEach { executeCommand(it) }
@@ -94,7 +102,7 @@ fun generateEventProcedure(tiler: Tiler): WinUser.WinEventProc {
         println("${window.getClassName()}, ${window.getStyle().caption()}, ${window.getExStyle().appWindow()}")
 
         val commands: List<TilerCommand> = when (event) {
-            EVENT_SYSTEM_FOREGROUND -> tiler.retile()
+            EVENT_SYSTEM_FOREGROUND -> tiler.windowActivated(window.toTilerWindow())
             EVENT_OBJECT_FOCUS -> emptyList()
             EVENT_OBJECT_SHOW -> tiler.windowAppeared(window.toTilerWindow())
             EVENT_OBJECT_DESTROY -> tiler.windowDisappeared(window.toTilerWindow())
