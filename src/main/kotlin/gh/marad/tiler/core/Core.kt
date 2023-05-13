@@ -165,7 +165,13 @@ class View(
         val windowsById = windows.associateBy { it.id }
         return this.windows.mapNotNull { windowsById[it] }
     }
+
     fun filterWindowsNotInView(windows: Windows): Windows = windows.filterNot { hasWindow(it.id) }
+
+    fun updateWindowsInView(windows: List<WindowId>) {
+        this.windows.clear()
+        this.windows.addAll(windows)
+    }
 
     fun swapWindows(a: WindowId, b: WindowId) {
         val aIdx = windows.indexOf(a)
@@ -175,6 +181,8 @@ class View(
         windows[aIdx] = windows[bIdx]
         windows[bIdx] = tmp
     }
+
+    fun debugGetWindowsInView(): List<WindowId> = windows
 }
 
 class ViewManager(private val defaultLayout: Layout) {
@@ -210,7 +218,6 @@ class Tiler(defaultLayout: Layout, private val getDesktopState: () -> DesktopSta
     }
 
     fun activateView(viewId: Int): List<TilerCommand> {
-        views.changeCurrentView(viewId)
         val desktopState = getDesktopState()
         val view = views.changeCurrentView(viewId)
         val minimizeCommands = view.filterWindowsNotInView(desktopState.windows)
@@ -225,6 +232,7 @@ class Tiler(defaultLayout: Layout, private val getDesktopState: () -> DesktopSta
         desktopState.windows.filterNot { it.minimized }
             .forEach { view.addWindow(it.id) }
         val windowsInView = view.filterWindowsInView(desktopState.windows)
+        view.updateWindowsInView(windowsInView.map { it.id })
         val positionedWindows = view.layout.retile(windowsInView)
         return calcWindowMovements(desktopState.windows, positionedWindows)
     }
@@ -255,4 +263,8 @@ class Tiler(defaultLayout: Layout, private val getDesktopState: () -> DesktopSta
 
     fun inView(id: WindowId): Boolean =
         views.currentView().hasWindow(id)
+
+    fun debugGetWindowsInView(): List<WindowId> {
+        return views.currentView().debugGetWindowsInView()
+    }
 }
