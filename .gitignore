@@ -41,5 +41,5 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-.drawio.bkp
-.drawio.dtmp
+*.drawio.bkp
+*.drawio.dtmp
