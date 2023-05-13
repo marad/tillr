@@ -5,7 +5,7 @@ import gh.marad.tiler.winapi.*
 import gh.marad.tiler.windowstiler.*
 
 
-// TODO activate last active window
+// TODO activate last active window after switching to a view
 // TODO moving window to other view
 // TODO allow for external configuration
 // TODO better layouts (eg. borders, customizable ratios, BSP layout)
