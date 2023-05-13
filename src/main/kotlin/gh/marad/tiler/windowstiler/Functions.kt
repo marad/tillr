@@ -52,11 +52,6 @@ val ignoredEvents = arrayOf(
 
 fun generateEventProcedure(tiler: Tiler): WinUser.WinEventProc {
     return WinUser.WinEventProc { hWinEventHook, event, hwnd, idObject, idChild, dwEventThread, dwmsEventTime ->
-        if (event == EVENT_SYSTEM_FOREGROUND) {
-            tiler.retile().execute()
-            return@WinEventProc
-        }
-
         if (hwnd == null || event in ignoredEvents) return@WinEventProc
 
         val window = Window(hwnd)
@@ -94,7 +89,7 @@ fun generateEventProcedure(tiler: Tiler): WinUser.WinEventProc {
         println("${window.getClassName()}, ${window.getStyle().caption()}, ${window.getExStyle().appWindow()}")
 
         val commands: List<TilerCommand> = when (event) {
-            EVENT_SYSTEM_FOREGROUND -> emptyList()
+            EVENT_SYSTEM_FOREGROUND -> tiler.retile()
             EVENT_OBJECT_FOCUS -> emptyList()
             EVENT_OBJECT_SHOW -> tiler.windowAppeared(window.toTilerWindow())
             EVENT_OBJECT_DESTROY -> tiler.windowDisappeared(window.toTilerWindow())
