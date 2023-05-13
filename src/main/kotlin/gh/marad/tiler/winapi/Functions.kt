@@ -15,6 +15,7 @@ typealias WindowMatcher = (Window) -> Boolean
 
 data class ManageOverride(val shouldManage: Boolean, val matcher: WindowMatcher)
 
+fun activeWindow(): Window = Window(u32.GetForegroundWindow())
 
 fun listWindows(): List<Window> {
     val windows = mutableListOf<Window>()

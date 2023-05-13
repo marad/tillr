@@ -143,6 +143,9 @@ fun applyCommands(cmds: List<TilerCommand>) {
                     } else { it }
                 }
             }
+
+            is ActivateWindow -> TODO()
+            is ShowWindow -> TODO()
         }
     }
 }

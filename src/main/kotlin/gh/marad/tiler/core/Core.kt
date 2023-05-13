@@ -208,13 +208,20 @@ class ViewManager(private val defaultLayout: Layout) {
         }
     }
 
+    fun getView(viewId: Int): View = _views.getOrPut(viewId) { View(layout = defaultLayout) }
+
     fun currentView(): View  {
-      return _views.getOrPut(_activeViewId) { View(layout = defaultLayout) }
+      return getView(_activeViewId)
     }
 
     fun changeCurrentView(viewId: Int): View {
         _activeViewId = viewId
         return currentView()
+    }
+
+    fun moveWindow(windowId: WindowId, viewId: Int) {
+        currentView().removeWindow(windowId)
+        getView(viewId).addWindow(windowId)
     }
 }
 
@@ -246,6 +253,11 @@ class Tiler(defaultLayout: Layout, private val getDesktopState: () -> DesktopSta
                     it + ActivateWindow(windowToActivate)
                 } else it
             }
+    }
+
+    fun moveWindow(window: Window, viewId: Int): List<TilerCommand> {
+        views.moveWindow(window.id, viewId)
+        return listOf(MinimizeWindow(window.id)) + retile()
     }
 
     fun retile(): List<TilerCommand> {

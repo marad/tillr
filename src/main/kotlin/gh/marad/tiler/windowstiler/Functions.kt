@@ -57,6 +57,8 @@ fun executeCommand(it: TilerCommand) = when(it) {
 }
 
 fun List<TilerCommand>.execute() = forEach { executeCommand(it) }
+fun List<TilerCommand>.debug() = also(::println)
+
 val ignoredEvents = arrayOf(
     EVENT_OBJECT_LOCATIONCHANGE, EVENT_OBJECT_NAMECHANGE, EVENT_SYSTEM_CAPTURESTART,
     EVENT_SYSTEM_CAPTUREEND, EVENT_OBJECT_DESTROY, EVENT_OBJECT_CREATE,
@@ -73,19 +75,6 @@ fun generateEventProcedure(tiler: Tiler): WinUser.WinEventProc {
             return@WinEventProc
         }
 
-
-//        // handle only window events
-//        if (idObject != OBJID_WINDOW) return@WinEventProc
-//
-//        // ignore events about windows tooltip windows
-//        if (window.getRealClassName() == "Xaml_WindowedPopupClass") return@WinEventProc
-//
-//        // window should be visible unless it's trying to tell us it's hiding
-//        val isNotVisible = !window.isVisible() && event != EVENT_OBJECT_HIDE
-//        if (isNotVisible || DwmApi.isCloaked(hwnd) || !window.isWindow() || window.getExStyle().toolWindow()) {
-//            return@WinEventProc
-//        }
-
         // handle only events for windows in view and events that introduce new windows into current view
         val shouldHandle = (tiler.inView(WID(hwnd)) || event in arrayOf(
             EVENT_OBJECT_SHOW,
@@ -97,9 +86,9 @@ fun generateEventProcedure(tiler: Tiler): WinUser.WinEventProc {
 
         if (overrides.shouldNotManage(window)) return@WinEventProc
 
-        println("0x${Integer.toHexString(event.toInt())} $hwnd - ${window.getTitle()} ")
-        println(window.getProcess().exePath())
-        println("${window.getClassName()}, ${window.getStyle().caption()}, ${window.getExStyle().appWindow()}")
+//        println("0x${Integer.toHexString(event.toInt())} $hwnd - ${window.getTitle()} ")
+//        println(window.getProcess().exePath())
+//        println("${window.getClassName()}, ${window.getStyle().caption()}, ${window.getExStyle().appWindow()}")
 
         val commands: List<TilerCommand> = when (event) {
             EVENT_SYSTEM_FOREGROUND -> tiler.windowActivated(window.toTilerWindow())
@@ -120,15 +109,15 @@ fun generateEventProcedure(tiler: Tiler): WinUser.WinEventProc {
 
             else -> emptyList()
         }
-        println(commands)
-        tiler.debugGetWindowsInView()
-            .map { it as WID }
-            .map { Window(it.handle) }
-            .forEach {
-                println("${it.handle} - ${it.getTitle()}")
-            }
-
-        println("-------------------")
+//        println(commands)
+//        tiler.debugGetWindowsInView()
+//            .map { it as WID }
+//            .map { Window(it.handle) }
+//            .forEach {
+//                println("${it.handle} - ${it.getTitle()}")
+//            }
+//
+//        println("-------------------")
         commands.execute()
     }
 }

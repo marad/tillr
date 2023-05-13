@@ -4,7 +4,7 @@ import gh.marad.tiler.core.*
 import gh.marad.tiler.winapi.*
 import gh.marad.tiler.windowstiler.*
 
-// TODO moving window to other view
+// TODO navigating to next/previous window within view
 // TODO allow for external configuration
 // TODO better layouts (eg. borders, customizable ratios, BSP layout)
 
@@ -34,6 +34,11 @@ fun main(args: Array<String>) {
     (0..8).forEach { viewId ->
         hotkeys.register("A-${viewId+1}") {
             tiler.activateView(viewId).execute()
+        }
+
+        hotkeys.register("S-A-${viewId+1}") {
+            tiler.moveWindow(activeWindow().toTilerWindow(), viewId).debug().execute()
+            tiler.activateView(viewId).debug().execute()
         }
     }
 
