@@ -7,6 +7,9 @@ import gh.marad.tiler.windowstiler.*
 // TODO navigating to next/previous window within view
 // TODO allow for external configuration
 // TODO better layouts (eg. borders, customizable ratios, BSP layout)
+// TODO hotkey to quickly activate/deactivate tiling
+// TODO installation script
+// TODO GH Actions CI/CD
 
 val overrides = listOf(
     ManageOverride(true) { win -> win.getTitle() in listOf("WhatsApp", "Messenger") },
