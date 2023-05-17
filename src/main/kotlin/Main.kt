@@ -5,6 +5,7 @@ import gh.marad.tiler.winapi.*
 import gh.marad.tiler.windowstiler.*
 
 // TODO navigating to next/previous window within view
+// TODO switch to previous view
 // TODO allow for external configuration
 // TODO better layouts (eg. borders, customizable ratios, BSP layout)
 // TODO hotkey to quickly activate/deactivate tiling

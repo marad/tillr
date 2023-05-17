@@ -1,10 +1,11 @@
 plugins {
     kotlin("jvm") version "1.8.20"
     application
+    id("pl.allegro.tech.build.axion-release") version "1.15.0"
 }
 
 group = "gh.marad.tiler"
-version = "1.0-SNAPSHOT"
+version = scmVersion.version
 
 repositories {
     mavenCentral()
