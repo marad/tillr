@@ -1,10 +1,13 @@
 import com.sun.jna.platform.win32.User32
 import gh.marad.tiler.winapi.Hotkeys
 import gh.marad.tiler.core.*
+import gh.marad.tiler.navigation.windowDown
+import gh.marad.tiler.navigation.windowLeft
+import gh.marad.tiler.navigation.windowRight
+import gh.marad.tiler.navigation.windowUp
 import gh.marad.tiler.winapi.*
 import gh.marad.tiler.windowstiler.*
 
-// TODO navigating to next/previous window within view
 // TODO switch to previous view
 // TODO allow for external configuration
 // TODO better layouts (eg. borders, customizable ratios, BSP layout)
@@ -34,6 +37,7 @@ fun main(args: Array<String>) {
     }
     tiler.retile().execute()
 
+    // desktop switching keys
     val hotkeys = Hotkeys()
     (0..8).forEach { viewId ->
         hotkeys.register("A-${viewId+1}") {
@@ -43,6 +47,20 @@ fun main(args: Array<String>) {
         hotkeys.register("S-A-${viewId+1}") {
             tiler.moveWindow(activeWindow().toTilerWindow(), viewId).debug().execute()
             tiler.activateView(viewId).debug().execute()
+        }
+    }
+
+    // window navigation keys
+    mapOf(
+        "L" to ::windowRight,
+        "H" to ::windowLeft,
+        "J" to ::windowDown,
+        "K" to ::windowUp
+    ).forEach { (key, selectWindow) ->
+        hotkeys.register("A-$key") {
+            val visibleWindows = listWindows().filterNot { it.isMinimized() }
+            selectWindow(activeWindow(), visibleWindows)
+                ?.let { User32.INSTANCE.SetForegroundWindow(it.handle) }
         }
     }
 
