@@ -40,12 +40,12 @@ class VerticalStackLayout(private var space: LayoutSpace) : Layout {
     override fun retile(windows: Windows): Windows {
         if (windows.isEmpty()) return emptyList()
 
-        var posY = 0
+        var posY = space.y
         val height = space.height / windows.size
         return windows.map {
             it.reposition(
                 x = space.x,
-                y = space.y + posY,
+                y = posY,
                 width = space.width,
                 height = height
             ).also {
@@ -87,7 +87,7 @@ class TwoColumnLayout(space: LayoutSpace) : Layout {
             return listOf(windows.first().reposition(space.x, space.y, space.width, space.height))
         }
 
-        val firstWindow = windows.first().reposition(0, 0, columnWidth, space.height)
+        val firstWindow = windows.first().reposition(space.x, space.y, columnWidth, space.height)
         val others = rightColumnLayout.retile(windows.drop(1))
         return listOf(firstWindow) + others
     }

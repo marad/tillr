@@ -8,6 +8,7 @@ import gh.marad.tiler.navigation.windowUp
 import gh.marad.tiler.winapi.*
 import gh.marad.tiler.windowstiler.*
 
+// TODO handle multiple monitors
 // TODO switch to previous view
 // TODO allow for external configuration
 // TODO better layouts (eg. borders, customizable ratios, BSP layout)
