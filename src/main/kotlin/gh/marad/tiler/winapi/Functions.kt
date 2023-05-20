@@ -58,3 +58,14 @@ fun windowsMainLoop() {
     }
 }
 
+fun windowBorders(hwnd: HWND): WindowBorders {
+    val clientRect = WinDef.RECT()
+    User32.INSTANCE.GetClientRect(hwnd, clientRect)
+    val windowRect = WinDef.RECT()
+    User32.INSTANCE.GetWindowRect(hwnd, windowRect)
+    val topLeft = POINT(0, 0)
+    val bottomRight = POINT(clientRect.toRectangle().width, clientRect.toRectangle().height)
+    myU32.ClientToScreen(hwnd, topLeft)
+    myU32.ClientToScreen(hwnd, bottomRight)
+    return WindowBorders(topLeft.x - windowRect.left, topLeft.y - windowRect.top, windowRect.right - bottomRight.x, windowRect.bottom - bottomRight.y)
+}

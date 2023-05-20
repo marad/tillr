@@ -19,7 +19,7 @@ fun executeCommand(it: TilerCommand) = when(it) {
         val hwnd = (it.windowId as WID).handle
         // correct the window size to account for the invisible
         // border of the window
-        val pos = it.position.addInvisibleBorders()
+        val pos = it.position.addInvisibleBorders(windowBorders(hwnd))
         User32.INSTANCE.SetWindowPos(hwnd, null,
             pos.x, pos.y, pos.width, pos.height,
             User32.SWP_ASYNCWINDOWPOS and User32.SWP_NOACTIVATE and User32.SWP_NOZORDER and User32.SWP_SHOWWINDOW)
@@ -64,20 +64,25 @@ fun generateEventProcedure(eventHandler: WindowEventHandler): WinUser.WinEventPr
             return@WinEventProc
         }
 
-        when (event) {
-            EVENT_SYSTEM_FOREGROUND -> eventHandler.windowActivated(window.toTilerWindow()).execute()
-            EVENT_OBJECT_FOCUS -> {}
-            EVENT_OBJECT_SHOW -> eventHandler.windowAppeared(window.toTilerWindow()).execute()
-            EVENT_OBJECT_DESTROY -> eventHandler.windowDisappeared(window.toTilerWindow()).execute()
-            EVENT_OBJECT_HIDE -> eventHandler.windowDisappeared(window.toTilerWindow()).execute()
-            EVENT_SYSTEM_MINIMIZESTART -> eventHandler.windowMinimized(window.toTilerWindow()).execute()
-            EVENT_SYSTEM_MINIMIZEEND -> eventHandler.windowRestored(window.toTilerWindow()).execute()
-            EVENT_SYSTEM_MOVESIZESTART -> {}
-            EVENT_SYSTEM_MOVESIZEEND -> {
-                eventHandler.windowMovedOrResized(window.toTilerWindow()).execute()
-            }
+        try {
+            when (event) {
+                EVENT_SYSTEM_FOREGROUND -> eventHandler.windowActivated(window.toTilerWindow()).execute()
+                EVENT_OBJECT_FOCUS -> {}
+                EVENT_OBJECT_SHOW -> eventHandler.windowAppeared(window.toTilerWindow()).execute()
+                EVENT_OBJECT_DESTROY -> eventHandler.windowDisappeared(window.toTilerWindow()).execute()
+                EVENT_OBJECT_HIDE -> eventHandler.windowDisappeared(window.toTilerWindow()).execute()
+                EVENT_SYSTEM_MINIMIZESTART -> eventHandler.windowMinimized(window.toTilerWindow()).execute()
+                EVENT_SYSTEM_MINIMIZEEND -> eventHandler.windowRestored(window.toTilerWindow()).execute()
+                EVENT_SYSTEM_MOVESIZESTART -> {}
+                EVENT_SYSTEM_MOVESIZEEND -> {
+                    eventHandler.windowMovedOrResized(window.toTilerWindow()).execute()
+                }
 
-            else -> {}
+                else -> {}
+            }
+        } catch (e: Exception) {
+            println("Error while handling event $event for window $window")
+            e.printStackTrace()
         }
     }
 }
