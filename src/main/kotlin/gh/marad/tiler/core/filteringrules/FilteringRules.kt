@@ -2,6 +2,7 @@ package gh.marad.tiler.core.filteringrules
 
 import gh.marad.tiler.core.Window
 
+@Suppress("unused")
 class FilteringRules {
     private val rules = mutableListOf(*CoreRules)
 

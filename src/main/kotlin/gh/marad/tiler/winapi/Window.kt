@@ -23,6 +23,7 @@ data class Window(val handle: WinDef.HWND) {
 
     fun isWindow(): Boolean = u32.IsWindow(handle)
 
+    @Suppress("unused")
     fun getClassName(): String {
         val classNameArray = CharArray(257)
         u32.GetClassName(handle, classNameArray, 257)

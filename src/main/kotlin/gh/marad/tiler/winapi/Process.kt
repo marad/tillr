@@ -6,7 +6,7 @@ import com.sun.jna.platform.win32.WinNT
 import com.sun.jna.ptr.IntByReference
 import java.io.Closeable
 
-class Process(val processId: Int) : Closeable {
+class Process(processId: Int) : Closeable {
     private val kernel = Kernel32.INSTANCE
     private val handle = kernel.OpenProcess(WinNT.PROCESS_QUERY_INFORMATION, false, processId)
 
@@ -22,8 +22,6 @@ class Process(val processId: Int) : Closeable {
         kernel.QueryFullProcessImageName(handle, 0, nameArray, readLen)
         return nameArray.concatToString().trim(Char(0))
     }
-
-    fun exeName(): String = exePath().split("\\").last()
 
     override fun close() {
         kernel.CloseHandle(handle)

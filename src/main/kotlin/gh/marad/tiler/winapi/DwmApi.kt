@@ -11,6 +11,7 @@ interface DwmApi : Library {
     fun DwmIsCompositionEnabled(enabled: BOOLByReference)
     fun DwmGetWindowAttribute(handle: HWND, attribute: DWORD, data: Pointer, length: DWORD)
 
+    @Suppress("unused")
     companion object {
         val INSTANCE = Native.load("dwmapi", DwmApi::class.java, W32APIOptions.DEFAULT_OPTIONS)
 

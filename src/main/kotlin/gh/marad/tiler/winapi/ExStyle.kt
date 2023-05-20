@@ -1,5 +1,6 @@
 package gh.marad.tiler.winapi
 
+@Suppress("unused")
 class ExStyle(val exStyle: Int) {
     fun acceptFiles() = check(WS_EX_ACCEPTFILES)
     fun appWindow() = check(WS_EX_APPWINDOW)

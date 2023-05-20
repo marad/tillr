@@ -19,7 +19,7 @@ import gh.marad.tiler.windowstiler.*
 // TODO installation script
 // TODO handle multiple monitors
 
-fun main(args: Array<String>) {
+fun main() {
     val filteringRules = FilteringRules()
 
     filteringRules.addAll(listOf(
