@@ -28,7 +28,6 @@ fun main() {
         Rule.ignoreIf { it.className == "ApplicationFrameTitleBarWindow" },
     ))
 
-    val monitor = Monitors.primary()
     val layout = TwoColumnLayout()
 //    val layout = OverlappingCascadeLayout(50)
     val viewManager = ViewManager { layout }
