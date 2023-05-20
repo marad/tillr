@@ -50,6 +50,7 @@ data class Window(val handle: WinDef.HWND) {
     fun isMinimized(): Boolean = myU32.IsIconic(handle)
     fun isMaximized(): Boolean = myU32.IsZoomed(handle)
     fun isVisible(): Boolean = u32.IsWindowVisible(handle)
+    fun isPopup(): Boolean = getStyle().popupWindow()
 
     fun getStyle(): Style = Style(u32.GetWindowLong(handle, WinUser.GWL_STYLE))
     fun getExStyle(): ExStyle = ExStyle(u32.GetWindowLong(handle, WinUser.GWL_EXSTYLE))
