@@ -1,7 +1,10 @@
 package gr.marad.tiler.core
 
 import gh.marad.tiler.core.*
-import io.kotest.matchers.collections.shouldContain
+import gh.marad.tiler.core.layout.Layout
+import gh.marad.tiler.core.layout.LayoutSpace
+import gh.marad.tiler.core.views.View
+import gh.marad.tiler.core.views.ViewManager
 import io.kotest.matchers.equals.shouldNotBeEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
@@ -10,9 +13,6 @@ import io.kotest.property.arbitrary.*
 import org.junit.jupiter.api.Test
 
 data class TestWindowId(val id: String): WindowId
-class TestWindowManager(private val windows: List<Window>): WindowManager {
-    override fun listWindows(): List<Window> = windows
-}
 
 class TestLayout : Layout {
     override fun updateSpace(space: LayoutSpace) {
@@ -57,31 +57,7 @@ fun window(title: String? = null, className: String? = null, position: WindowPos
     return Window(windowIdGen.next(), finalTitle, finalClassName, "exe_path", finalPosition, minimized = false)
 }
 
-fun wmWith(vararg windows: Window): WindowManager = TestWindowManager(windows.toList())
-fun wmWith(windows: List<Window>): WindowManager = TestWindowManager(windows)
-
 class CoreTest {
-    @Test
-    fun `should generate commands for showing and hiding windows in view`() {
-        // given
-        val windowListGen = Arb.list(windowGen, 1..20)
-        val windowsInView = windowListGen.next()
-        val otherWindows = windowListGen.next()
-        val allWindows = windowsInView + otherWindows
-
-        // when
-        val commands = activate(allWindows, windowsInView)
-
-        // then
-        for (window in windowsInView) {
-            commands shouldContain SetWindowPosition(window.id, window.position)
-        }
-
-        for (window in otherWindows) {
-            commands shouldContain MinimizeWindow(window.id)
-        }
-    }
-
     @Test
     fun `should set window position if it changes`() {
         // given
@@ -89,7 +65,7 @@ class CoreTest {
         val updatedPosition = WindowPosition(x = 0, y = 0, width = 200, height = 100)
 
         // when
-        val (command) = calcWindowMovements(listOf(aWindow), listOf(aWindow.copy(position = updatedPosition)))
+        val (command) = createPositionCommands(listOf(aWindow), listOf(aWindow.copy(position = updatedPosition)))
 
         // then
         command shouldBe SetWindowPosition(aWindow.id, updatedPosition)
@@ -145,7 +121,7 @@ class ViewManagerTest {
     fun `should allow changing the view`() {
         // given
         val aWindow = windowGen.next()
-        val aViewManager = ViewManager(TestLayout())
+        val aViewManager = ViewManager { TestLayout() }
         val defaultView = aViewManager.currentView()
 
         // when
@@ -161,7 +137,7 @@ class ViewManagerTest {
     fun `should allow adding one window to multiple views`() {
         // given
         val aWindow = windowGen.next()
-        val aViewManager = ViewManager(TestLayout())
+        val aViewManager = ViewManager { TestLayout() }
         val defaultView = aViewManager.currentView()
 
 

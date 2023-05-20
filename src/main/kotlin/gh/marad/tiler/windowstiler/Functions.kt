@@ -4,6 +4,8 @@ import com.sun.jna.platform.win32.User32
 import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.platform.win32.WinUser
 import gh.marad.tiler.core.*
+import gh.marad.tiler.core.Window as TilerWindow
+import gh.marad.tiler.core.views.ViewManager
 import gh.marad.tiler.winapi.*
 import gh.marad.tiler.winapi.Window
 import overrides
@@ -24,6 +26,10 @@ fun getDesktopState(): DesktopState {
             .map { it.toTilerWindow() }
     )
 }
+
+fun windowsUnderCursor(): List<TilerWindow> =
+    gh.marad.tiler.winapi.windowsUnderCursor()
+        .map { it.toTilerWindow() }
 
 fun executeCommand(it: TilerCommand) = when(it) {
     is SetWindowPosition -> {
@@ -65,7 +71,7 @@ val ignoredEvents = arrayOf(
     EVENT_OBJECT_PARENTCHANGE, EVENT_OBJECT_REORDER
 )
 
-fun generateEventProcedure(tiler: Tiler): WinUser.WinEventProc {
+fun generateEventProcedure(tiler: WindowEventHandler, viewManager: ViewManager): WinUser.WinEventProc {
     return WinUser.WinEventProc { hWinEventHook, event, hwnd, idObject, idChild, dwEventThread, dwmsEventTime ->
         if (hwnd == null || event in ignoredEvents) return@WinEventProc
 
@@ -76,7 +82,8 @@ fun generateEventProcedure(tiler: Tiler): WinUser.WinEventProc {
         }
 
         // handle only events for windows in view and events that introduce new windows into current view
-        val shouldHandle = (tiler.inView(WID(hwnd)) || event in arrayOf(
+
+        val shouldHandle = (viewManager.currentView().hasWindow(WID(hwnd)) || event in arrayOf(
             EVENT_OBJECT_SHOW,
             EVENT_SYSTEM_MINIMIZEEND
         )) || overrides.shouldManage(window)
@@ -86,39 +93,21 @@ fun generateEventProcedure(tiler: Tiler): WinUser.WinEventProc {
 
         if (overrides.shouldNotManage(window)) return@WinEventProc
 
-//        println("0x${Integer.toHexString(event.toInt())} $hwnd - ${window.getTitle()} ")
-//        println(window.getProcess().exePath())
-//        println("${window.getClassName()}, ${window.getStyle().caption()}, ${window.getExStyle().appWindow()}")
-
-        val commands: List<TilerCommand> = when (event) {
-            EVENT_SYSTEM_FOREGROUND -> tiler.windowActivated(window.toTilerWindow())
-            EVENT_OBJECT_FOCUS -> emptyList()
-            EVENT_OBJECT_SHOW -> tiler.windowAppeared(window.toTilerWindow())
-            EVENT_OBJECT_DESTROY -> tiler.windowDisappeared(window.toTilerWindow())
-            EVENT_OBJECT_HIDE -> tiler.windowDisappeared(window.toTilerWindow())
-            EVENT_SYSTEM_MINIMIZESTART -> tiler.windowMinimized(window.toTilerWindow())
-            EVENT_SYSTEM_MINIMIZEEND -> tiler.windowRestored(window.toTilerWindow())
-            EVENT_SYSTEM_MOVESIZESTART -> emptyList()
+        when (event) {
+            EVENT_SYSTEM_FOREGROUND -> tiler.windowActivated(window.toTilerWindow()).execute()
+            EVENT_OBJECT_FOCUS -> {}
+            EVENT_OBJECT_SHOW -> tiler.windowAppeared(window.toTilerWindow()).execute()
+            EVENT_OBJECT_DESTROY -> tiler.windowDisappeared(window.toTilerWindow()).execute()
+            EVENT_OBJECT_HIDE -> tiler.windowDisappeared(window.toTilerWindow()).execute()
+            EVENT_SYSTEM_MINIMIZESTART -> tiler.windowMinimized(window.toTilerWindow()).execute()
+            EVENT_SYSTEM_MINIMIZEEND -> tiler.windowRestored(window.toTilerWindow()).execute()
+            EVENT_SYSTEM_MOVESIZESTART -> {}
             EVENT_SYSTEM_MOVESIZEEND -> {
-                val foundWindow = windowsUnderCursor().lastOrNull()
-                if (foundWindow != null && foundWindow.handle != window.handle) {
-                    tiler.swapWindows(window.toTilerWindow().id, foundWindow.toTilerWindow().id)
-                }
-                tiler.retile()
+                tiler.windowMovedOrResized(window.toTilerWindow()).execute()
             }
 
-            else -> emptyList()
+            else -> {}
         }
-//        println(commands)
-//        tiler.debugGetWindowsInView()
-//            .map { it as WID }
-//            .map { Window(it.handle) }
-//            .forEach {
-//                println("${it.handle} - ${it.getTitle()}")
-//            }
-//
-//        println("-------------------")
-        commands.execute()
     }
 }
 

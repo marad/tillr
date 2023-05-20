@@ -1,6 +1,12 @@
-package gr.marad.tiler.core
+package gr.marad.tiler
 
 import gh.marad.tiler.core.*
+import gh.marad.tiler.core.layout.LayoutSpace
+import gh.marad.tiler.core.layout.TwoColumnLayout
+import gh.marad.tiler.core.views.ViewManager
+import gh.marad.tiler.core.views.ViewSwitcher
+import gr.marad.tiler.core.TestWindowId
+import gr.marad.tiler.core.testIdGen
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.arbitrary
 import io.kotest.property.arbitrary.int
@@ -13,15 +19,21 @@ import kotlin.system.exitProcess
 
 //val typeface = Typeface.makeDefault()
 
+var mouseX = 0
+var mouseY = 0
 var width = 640
 var height = 480
-//val tiler = Tiler(VerticalStackLayout(LayoutSpace(0, 0, width, height)))
-val tiler = Tiler(TwoColumnLayout(LayoutSpace(0, 0, width, height))) { desktopWindows.toDesktopState() }
+val viewManager = ViewManager { TwoColumnLayout(LayoutSpace(0, 0, width, height)) }
+val viewSwitcher = ViewSwitcher(viewManager) { desktopWindows.toDesktopState() }
+val tiler = WindowsTiler(viewManager) { desktopWindows.toDesktopState() }
+val eventHandler = WindowEventHandler(viewManager, tiler) {
+    getWindowAt(mouseX, mouseY)?.let { listOf(it) } ?: emptyList()
+}
 
-val xGen2 = Arb.int(0, width-10)
-val yGen2 = Arb.int(0, height-10)
-val wGen2 = Arb.int(100, width/2)
-val hGen2 = Arb.int(100, height/2)
+val xGen2 = Arb.int(0, width -10)
+val yGen2 = Arb.int(0, height -10)
+val wGen2 = Arb.int(100, width /2)
+val hGen2 = Arb.int(100, height /2)
 val posGen2 = arbitrary {
     WindowPosition(xGen2.next(it), yGen2.next(it), wGen2.next(it), hGen2.next(it))
 }
@@ -40,8 +52,6 @@ fun MutableList<WindowInfo>.toDesktopState() = DesktopState(this.map { it.window
 val colors = mutableMapOf<String, Paint>()
 
 fun init(windowHandle: Long) {
-    var mouseX = 0
-    var mouseY = 0
 
     glfwSetKeyCallback(windowHandle) { window, key, scanCode, action, mods ->
         if (key == GLFW_KEY_A && action == GLFW_PRESS) {
@@ -49,7 +59,7 @@ fun init(windowHandle: Long) {
             val window = Window(TestWindowId(windowID), "Name", "class", "exe_path", posGen2.next(), false)
             colors.put(windowID, paintGen.next())
             desktopWindows.add(WindowInfo(window, false))
-            val cmds = tiler.windowAppeared(window)
+            val cmds = eventHandler.windowAppeared(window)
             applyCommands(cmds)
         }
 
@@ -57,7 +67,7 @@ fun init(windowHandle: Long) {
             val windowAtCursor = getWindowAt(mouseX, mouseY) ?: desktopWindows.lastOrNull()?.window
             if (windowAtCursor != null) {
                 desktopWindows.removeIf { windowAtCursor== it.window }
-                val cmds = tiler.windowDisappeared(windowAtCursor)
+                val cmds = eventHandler.windowDisappeared(windowAtCursor)
                 applyCommands(cmds)
             }
         }
@@ -70,7 +80,7 @@ fun init(windowHandle: Long) {
                         it.copy(minimized = true)
                     } else { it }
                 }
-                tiler.windowMinimized(windowAtCursor)
+                eventHandler.windowMinimized(windowAtCursor)
                     .also { applyCommands(it) }
             }
         }
@@ -83,7 +93,7 @@ fun init(windowHandle: Long) {
                         it.copy(minimized = false)
                     } else { it }
                 }
-                tiler.windowRestored(windowToRestore)
+                eventHandler.windowRestored(windowToRestore)
                     .also(::applyCommands)
             }
         }
@@ -91,7 +101,7 @@ fun init(windowHandle: Long) {
 
         if (key in GLFW_KEY_0..GLFW_KEY_9 && action == GLFW_PRESS) {
             val viewId = key - GLFW_KEY_0 - 1
-            val cmds = tiler.activateView(viewId)
+            val cmds = viewSwitcher.switchToView(viewId)
             applyCommands(cmds)
         }
 
@@ -156,7 +166,7 @@ fun render(canvas: Canvas) {
     paint.color = Color.makeARGB(255, 50, 100, 50)
     paint.isAntiAlias = true
     canvas.clear(0x000000)
-    canvas.drawCircle(width/2f, height/2f, height/2f, paint)
+    canvas.drawCircle(width /2f, height /2f, height /2f, paint)
 
 
     desktopWindows.forEach { windowInfo ->
@@ -242,8 +252,7 @@ fun main() {
         )
 
         println("Retiling!")
-        tiler.retile()
-        tiler.updateSpace(LayoutSpace(0, 0, w, h))
+        applyCommands(tiler.retile())
     }
 
     init(windowHandle)

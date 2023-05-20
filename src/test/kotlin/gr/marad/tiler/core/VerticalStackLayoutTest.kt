@@ -1,7 +1,7 @@
 package gr.marad.tiler.core
 
-import gh.marad.tiler.core.LayoutSpace
-import gh.marad.tiler.core.VerticalStackLayout
+import gh.marad.tiler.core.layout.LayoutSpace
+import gh.marad.tiler.core.layout.VerticalStackLayout
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.property.Arb
@@ -24,7 +24,7 @@ class VerticalStackLayoutTest {
         positionedWindows.forEach {
             it.position.x shouldBeExactly 0
             it.position.width shouldBeExactly 800
-            it.position.height shouldBeExactly (1000 / someWindows.size)
+            it.position.height shouldBeExactly (600 / someWindows.size)
         }
 
         // and each window should be lower than the previous window

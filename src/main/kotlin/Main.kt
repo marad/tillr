@@ -1,6 +1,8 @@
 import com.sun.jna.platform.win32.User32
 import gh.marad.tiler.winapi.Hotkeys
 import gh.marad.tiler.core.*
+import gh.marad.tiler.core.layout.TwoColumnLayout
+import gh.marad.tiler.core.views.ViewManager
 import gh.marad.tiler.navigation.windowDown
 import gh.marad.tiler.navigation.windowLeft
 import gh.marad.tiler.navigation.windowRight
@@ -8,13 +10,12 @@ import gh.marad.tiler.navigation.windowUp
 import gh.marad.tiler.winapi.*
 import gh.marad.tiler.windowstiler.*
 
-// TODO handle multiple monitors
-// TODO switch to previous view
-// TODO allow for external configuration
 // TODO better layouts (eg. borders, customizable ratios, BSP layout)
+// TODO allow for external configuration
 // TODO hotkey to quickly activate/deactivate tiling
-// TODO installation script
 // TODO GH Actions CI/CD
+// TODO installation script
+// TODO handle multiple monitors
 
 val overrides = listOf(
     ManageOverride(true) { win -> win.getTitle() in listOf("WhatsApp", "Messenger") },
@@ -25,30 +26,34 @@ val overrides = listOf(
 
 fun main(args: Array<String>) {
     val monitor = Monitors.primary()
-
     val layout = TwoColumnLayout(monitor.workArea.toLayoutSpace())
-//    val layout = VerticalStackLayout(monitor.workArea.toLayoutSpace())
-    val tiler = Tiler(layout, ::getDesktopState)
-    tiler.activateView(0)
-    getDesktopState().windows.forEach {
-        if (!it.minimized) {
-            tiler.windowAppeared(it)
-            println("${it.id} - ${it.windowName}")
-        }
-    }
-    tiler.retile().execute()
+    val viewManager = ViewManager { layout }
+    val windowsTiler = WindowsTiler(viewManager, ::getDesktopState)
+    val windowEventHandler = WindowEventHandler(viewManager, windowsTiler, ::windowsUnderCursor)
+    val tilerProc = generateEventProcedure(windowEventHandler, viewManager)
 
+    windowsTiler.initializeWithOpenWindows().execute()
+    configureHotkeys(windowsTiler)
+    User32.INSTANCE.SetWinEventHook(EVENT_MIN, EVENT_MAX, null, tilerProc, 0, 0, 0)
+    windowsMainLoop()
+}
+
+private fun configureHotkeys(windowsTiler: WindowsTiler) {
     // desktop switching keys
     val hotkeys = Hotkeys()
     (0..8).forEach { viewId ->
-        hotkeys.register("A-${viewId+1}") {
-            tiler.activateView(viewId).execute()
+        hotkeys.register("A-${viewId + 1}") {
+            windowsTiler.switchToView(viewId).execute()
         }
 
-        hotkeys.register("S-A-${viewId+1}") {
-            tiler.moveWindow(activeWindow().toTilerWindow(), viewId).debug().execute()
-            tiler.activateView(viewId).debug().execute()
+        hotkeys.register("S-A-${viewId + 1}") {
+            windowsTiler.moveWindow(activeWindow().toTilerWindow(), viewId).execute()
+            windowsTiler.switchToView(viewId).execute()
         }
+    }
+
+    hotkeys.register("A-E") {
+        windowsTiler.switchToPreviousView().execute()
     }
 
     // window navigation keys
@@ -64,8 +69,4 @@ fun main(args: Array<String>) {
                 ?.let { User32.INSTANCE.SetForegroundWindow(it.handle) }
         }
     }
-
-    val tilerProc = generateEventProcedure(tiler)
-    User32.INSTANCE.SetWinEventHook(EVENT_MIN, EVENT_MAX, null, tilerProc, 0, 0, 0)
-    windowsMainLoop()
 }
