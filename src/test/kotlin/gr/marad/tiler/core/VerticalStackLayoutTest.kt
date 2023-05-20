@@ -15,10 +15,10 @@ class VerticalStackLayoutTest {
         // given
         val windowListGen = Arb.list(windowGen, 1..10)
         val someWindows = windowListGen.next()
-        val aVerticalStackLayout = VerticalStackLayout(LayoutSpace(0, 0, 800, 600))
+        val aVerticalStackLayout = VerticalStackLayout()
 
         // when
-        val positionedWindows = aVerticalStackLayout.retile(someWindows)
+        val positionedWindows = aVerticalStackLayout.retile(someWindows, LayoutSpace(0, 0, 800, 600))
 
         // then all positioned windows should have the same dimensions
         positionedWindows.forEach {

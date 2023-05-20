@@ -2,8 +2,8 @@ package gr.marad.tiler
 
 import gh.marad.tiler.core.*
 import gh.marad.tiler.core.filteringrules.FilteringRules
+import gh.marad.tiler.core.layout.OverlappingCascadeLayout
 import gh.marad.tiler.core.layout.LayoutSpace
-import gh.marad.tiler.core.layout.TwoColumnLayout
 import gh.marad.tiler.core.views.ViewManager
 import gh.marad.tiler.core.views.ViewSwitcher
 import gr.marad.tiler.core.TestWindowId
@@ -25,9 +25,10 @@ var mouseY = 0
 var width = 640
 var height = 480
 val filteringRules = FilteringRules()
-val viewManager = ViewManager { TwoColumnLayout(LayoutSpace(0, 0, width, height)) }
+//val viewManager = ViewManager { TwoColumnLayout(LayoutSpace(0, 0, width, height)) }
+val viewManager = ViewManager { OverlappingCascadeLayout(20) }
 val viewSwitcher = ViewSwitcher(viewManager) { desktopWindows.toDesktopState() }
-val tiler = WindowsTiler(viewManager, filteringRules) { desktopWindows.toDesktopState() }
+val tiler = WindowsTiler(viewManager) { desktopWindows.toDesktopState() }
 val eventHandler = WindowEventHandler(viewManager, tiler, filteringRules) {
     getWindowAt(mouseX, mouseY)?.let { listOf(it) } ?: emptyList()
 }
@@ -49,7 +50,11 @@ val paintGen = arbitrary {
 data class WindowInfo(val window: Window, var minimized: Boolean)
 var desktopWindows = mutableListOf<WindowInfo>()
 
-fun MutableList<WindowInfo>.toDesktopState() = DesktopState(this.map { it.window })
+fun MutableList<WindowInfo>.toDesktopState() = DesktopState(
+    allWindows = this.map { it.window },
+    windowsToManage = this.map { it.window },
+    layoutSpace = LayoutSpace(0, 0, width, height)
+)
 
 val colors = mutableMapOf<String, Paint>()
 
