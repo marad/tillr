@@ -1,6 +1,7 @@
 package gr.marad.tiler
 
 import gh.marad.tiler.core.*
+import gh.marad.tiler.core.filteringrules.FilteringRules
 import gh.marad.tiler.core.layout.LayoutSpace
 import gh.marad.tiler.core.layout.TwoColumnLayout
 import gh.marad.tiler.core.views.ViewManager
@@ -23,10 +24,11 @@ var mouseX = 0
 var mouseY = 0
 var width = 640
 var height = 480
+val filteringRules = FilteringRules()
 val viewManager = ViewManager { TwoColumnLayout(LayoutSpace(0, 0, width, height)) }
 val viewSwitcher = ViewSwitcher(viewManager) { desktopWindows.toDesktopState() }
-val tiler = WindowsTiler(viewManager) { desktopWindows.toDesktopState() }
-val eventHandler = WindowEventHandler(viewManager, tiler) {
+val tiler = WindowsTiler(viewManager, filteringRules) { desktopWindows.toDesktopState() }
+val eventHandler = WindowEventHandler(viewManager, tiler, filteringRules) {
     getWindowAt(mouseX, mouseY)?.let { listOf(it) } ?: emptyList()
 }
 
@@ -56,7 +58,7 @@ fun init(windowHandle: Long) {
     glfwSetKeyCallback(windowHandle) { window, key, scanCode, action, mods ->
         if (key == GLFW_KEY_A && action == GLFW_PRESS) {
             val windowID = testIdGen.next()
-            val window = Window(TestWindowId(windowID), "Name", "class", "exe_path", posGen2.next(), false)
+            val window = Window(TestWindowId(windowID), "Name", "class", "exe_path", posGen2.next(), isMinimized = false, isMaximized = false, isPopup = false)
             colors.put(windowID, paintGen.next())
             desktopWindows.add(WindowInfo(window, false))
             val cmds = eventHandler.windowAppeared(window)

@@ -27,9 +27,9 @@ data class Window(val id: WindowId,
                   val className: String,
                   val exePath: String,
                   val position: WindowPosition,
-                  val minimized: Boolean,
-                  val maximized: Boolean,
-                  val popupWindow: Boolean,
+                  val isMinimized: Boolean,
+                  val isMaximized: Boolean,
+                  val isPopup: Boolean,
     ) {
     val exeName = exePath.split("\\").last()
     fun reposition(x: Int?, y: Int?, width: Int? = null, height: Int? = null): Window {

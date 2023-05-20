@@ -5,27 +5,10 @@ import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.platform.win32.WinUser
 import gh.marad.tiler.core.*
 import gh.marad.tiler.core.Window as TilerWindow
-import gh.marad.tiler.core.views.ViewManager
 import gh.marad.tiler.winapi.*
 import gh.marad.tiler.winapi.Window
-import overrides
 
-fun List<ManageOverride>.shouldManage(win: Window): Boolean =
-    filter { it.matcher.invoke(win) }
-        .any { it.shouldManage }
-
-fun List<ManageOverride>.shouldNotManage(win: Window): Boolean =
-    filterNot { it.shouldManage }
-        .any { it.matcher.invoke(win) }
-
-fun shouldManage(window: Window) = !window.getStyle().popupWindow() || overrides.shouldManage(window)
-fun getDesktopState(): DesktopState {
-    return DesktopState(
-        listWindows()
-            .filter { shouldManage(it) }
-            .map { it.toTilerWindow() }
-    )
-}
+fun getDesktopState() = DesktopState(listWindows().map { it.toTilerWindow() })
 
 fun windowsUnderCursor(): List<TilerWindow> =
     gh.marad.tiler.winapi.windowsUnderCursor()
@@ -71,7 +54,7 @@ val ignoredEvents = arrayOf(
     EVENT_OBJECT_PARENTCHANGE, EVENT_OBJECT_REORDER
 )
 
-fun generateEventProcedure(tiler: WindowEventHandler, viewManager: ViewManager): WinUser.WinEventProc {
+fun generateEventProcedure(eventHandler: WindowEventHandler): WinUser.WinEventProc {
     return WinUser.WinEventProc { hWinEventHook, event, hwnd, idObject, idChild, dwEventThread, dwmsEventTime ->
         if (hwnd == null || event in ignoredEvents) return@WinEventProc
 
@@ -81,29 +64,17 @@ fun generateEventProcedure(tiler: WindowEventHandler, viewManager: ViewManager):
             return@WinEventProc
         }
 
-        // handle only events for windows in view and events that introduce new windows into current view
-
-        val shouldHandle = (viewManager.currentView().hasWindow(WID(hwnd)) || event in arrayOf(
-            EVENT_OBJECT_SHOW,
-            EVENT_SYSTEM_MINIMIZEEND
-        )) || overrides.shouldManage(window)
-        if (!shouldHandle) {
-            return@WinEventProc
-        }
-
-        if (overrides.shouldNotManage(window)) return@WinEventProc
-
         when (event) {
-            EVENT_SYSTEM_FOREGROUND -> tiler.windowActivated(window.toTilerWindow()).execute()
+            EVENT_SYSTEM_FOREGROUND -> eventHandler.windowActivated(window.toTilerWindow()).execute()
             EVENT_OBJECT_FOCUS -> {}
-            EVENT_OBJECT_SHOW -> tiler.windowAppeared(window.toTilerWindow()).execute()
-            EVENT_OBJECT_DESTROY -> tiler.windowDisappeared(window.toTilerWindow()).execute()
-            EVENT_OBJECT_HIDE -> tiler.windowDisappeared(window.toTilerWindow()).execute()
-            EVENT_SYSTEM_MINIMIZESTART -> tiler.windowMinimized(window.toTilerWindow()).execute()
-            EVENT_SYSTEM_MINIMIZEEND -> tiler.windowRestored(window.toTilerWindow()).execute()
+            EVENT_OBJECT_SHOW -> eventHandler.windowAppeared(window.toTilerWindow()).execute()
+            EVENT_OBJECT_DESTROY -> eventHandler.windowDisappeared(window.toTilerWindow()).execute()
+            EVENT_OBJECT_HIDE -> eventHandler.windowDisappeared(window.toTilerWindow()).execute()
+            EVENT_SYSTEM_MINIMIZESTART -> eventHandler.windowMinimized(window.toTilerWindow()).execute()
+            EVENT_SYSTEM_MINIMIZEEND -> eventHandler.windowRestored(window.toTilerWindow()).execute()
             EVENT_SYSTEM_MOVESIZESTART -> {}
             EVENT_SYSTEM_MOVESIZEEND -> {
-                tiler.windowMovedOrResized(window.toTilerWindow()).execute()
+                eventHandler.windowMovedOrResized(window.toTilerWindow()).execute()
             }
 
             else -> {}

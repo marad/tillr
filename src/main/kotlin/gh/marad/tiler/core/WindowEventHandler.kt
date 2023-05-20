@@ -1,19 +1,25 @@
 package gh.marad.tiler.core
 
+import gh.marad.tiler.core.filteringrules.FilteringRules
 import gh.marad.tiler.core.views.ViewManager
 
 class WindowEventHandler(
     private val viewManager: ViewManager,
     private val windowsTiler: WindowsTiler,
+    private val filteringRules: FilteringRules,
     private val windowsUnderCursor: () -> List<Window>,
 ) {
     fun windowActivated(window: Window): List<TilerCommand> {
-        viewManager.currentView().addWindow(window.id)
+        if (filteringRules.shouldManage(window)) {
+            viewManager.currentView().addWindow(window.id)
+        }
         return windowsTiler.retile()
     }
 
     fun windowAppeared(window: Window): List<TilerCommand> {
-        viewManager.currentView().addWindow(window.id)
+        if (filteringRules.shouldManage(window)) {
+            viewManager.currentView().addWindow(window.id)
+        }
         return windowsTiler.retile()
     }
 
@@ -28,7 +34,9 @@ class WindowEventHandler(
     }
 
     fun windowRestored(window: Window): List<TilerCommand> {
-        viewManager.currentView().addWindow(window.id)
+        if (filteringRules.shouldManage(window)) {
+            viewManager.currentView().addWindow(window.id)
+        }
         return windowsTiler.retile()
     }
 

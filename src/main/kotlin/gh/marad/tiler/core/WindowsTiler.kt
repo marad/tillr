@@ -1,18 +1,24 @@
 package gh.marad.tiler.core
 
+import gh.marad.tiler.core.filteringrules.FilteringRules
 import gh.marad.tiler.core.views.ViewManager
 import gh.marad.tiler.core.views.ViewSwitcher
 import gh.marad.tiler.core.Window as TilerWindow
 
-class WindowsTiler(private val viewManager: ViewManager, private val getDesktopState: () -> DesktopState) {
+class WindowsTiler(
+    private val viewManager: ViewManager,
+    private val filteringRules: FilteringRules,
+    getDesktopState: () -> DesktopState
+) {
     private val viewSwitcher = ViewSwitcher(viewManager, getDesktopState)
+
+    private val getWindows = { getDesktopState().windows.filter { filteringRules.shouldManage(it) } }
 
     fun initializeWithOpenWindows(): List<TilerCommand> {
         viewManager.changeCurrentView(0)
-        getDesktopState().windows.forEach {
-            if (!it.minimized) {
+        getWindows().forEach {
+            if (!it.isPopup && !it.isMinimized) {
                 viewManager.currentView().addWindow(it.id)
-                println("${it.id} - ${it.windowName}")
             }
         }
         return retile()
@@ -33,6 +39,7 @@ class WindowsTiler(private val viewManager: ViewManager, private val getDesktopS
 
     fun retile(): List<TilerCommand> {
         val view = viewManager.currentView()
-        return retile(view, getDesktopState())
+        return retile(view, getWindows())
     }
+
 }

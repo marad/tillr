@@ -1,6 +1,8 @@
 import com.sun.jna.platform.win32.User32
 import gh.marad.tiler.winapi.Hotkeys
 import gh.marad.tiler.core.*
+import gh.marad.tiler.core.filteringrules.FilteringRules
+import gh.marad.tiler.core.filteringrules.Rule
 import gh.marad.tiler.core.layout.TwoColumnLayout
 import gh.marad.tiler.core.views.ViewManager
 import gh.marad.tiler.navigation.windowDown
@@ -17,20 +19,21 @@ import gh.marad.tiler.windowstiler.*
 // TODO installation script
 // TODO handle multiple monitors
 
-val overrides = listOf(
-    ManageOverride(true) { win -> win.getTitle() in listOf("WhatsApp", "Messenger") },
-    ManageOverride(true) { win -> win.getTitle() == "Microsoft To Do" && win.getRealClassName() == "ApplicationFrameWindow"},
-    ManageOverride(false) { win -> win.getRealClassName() == "ApplicationFrameTitleBarWindow" },
-    ManageOverride(false) { win -> win.getTitle().isBlank() && win.getProcess().exeName() == "idea64.exe"},
-)
-
 fun main(args: Array<String>) {
+    val filteringRules = FilteringRules()
+
+    filteringRules.addAll(listOf(
+        Rule.manageIf { it.windowName in listOf("WhatsApp", "Messenger") },
+        Rule.manageIf { it.windowName == "Microsoft To Do" && it.className == "ApplicationFrameWindow" },
+        Rule.ignoreIf { it.className == "ApplicationFrameTitleBarWindow" },
+    ))
+
     val monitor = Monitors.primary()
     val layout = TwoColumnLayout(monitor.workArea.toLayoutSpace())
     val viewManager = ViewManager { layout }
-    val windowsTiler = WindowsTiler(viewManager, ::getDesktopState)
-    val windowEventHandler = WindowEventHandler(viewManager, windowsTiler, ::windowsUnderCursor)
-    val tilerProc = generateEventProcedure(windowEventHandler, viewManager)
+    val windowsTiler = WindowsTiler(viewManager, filteringRules, ::getDesktopState)
+    val windowEventHandler = WindowEventHandler(viewManager, windowsTiler, filteringRules, ::windowsUnderCursor)
+    val tilerProc = generateEventProcedure(windowEventHandler)
 
     windowsTiler.initializeWithOpenWindows().execute()
     configureHotkeys(windowsTiler)

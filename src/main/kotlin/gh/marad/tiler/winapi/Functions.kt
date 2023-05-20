@@ -11,10 +11,6 @@ import java.awt.Point
 private val u32 = User32.INSTANCE
 
 
-typealias WindowMatcher = (Window) -> Boolean
-
-data class ManageOverride(val shouldManage: Boolean, val matcher: WindowMatcher)
-
 fun activeWindow(): Window = Window(u32.GetForegroundWindow())
 
 fun listWindows(): List<Window> {
