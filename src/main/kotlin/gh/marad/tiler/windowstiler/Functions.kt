@@ -4,11 +4,17 @@ import com.sun.jna.platform.win32.User32
 import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.platform.win32.WinUser
 import gh.marad.tiler.core.*
+import gh.marad.tiler.core.filteringrules.FilteringRules
 import gh.marad.tiler.core.Window as TilerWindow
 import gh.marad.tiler.winapi.*
 import gh.marad.tiler.winapi.Window
 
-fun getDesktopState() = DesktopState(listWindows().map { it.toTilerWindow() })
+fun getDesktopState(filteringRules: FilteringRules): DesktopState {
+    val space = Monitors.primary().workArea.toLayoutSpace()
+    val allWindows = listWindows().map { it.toTilerWindow() }
+    val toManage = allWindows.filter { filteringRules.shouldManage(it) }
+    return DesktopState(space, allWindows, toManage)
+}
 
 fun windowsUnderCursor(): List<TilerWindow> =
     gh.marad.tiler.winapi.windowsUnderCursor()

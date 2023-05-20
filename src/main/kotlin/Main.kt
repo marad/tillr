@@ -29,9 +29,10 @@ fun main() {
     ))
 
     val monitor = Monitors.primary()
-    val layout = TwoColumnLayout(monitor.workArea.toLayoutSpace())
+    val layout = TwoColumnLayout()
+//    val layout = OverlappingCascadeLayout(50)
     val viewManager = ViewManager { layout }
-    val windowsTiler = WindowsTiler(viewManager, filteringRules, ::getDesktopState)
+    val windowsTiler = WindowsTiler(viewManager) { getDesktopState(filteringRules) }
     val windowEventHandler = WindowEventHandler(viewManager, windowsTiler, filteringRules, ::windowsUnderCursor)
     val tilerProc = generateEventProcedure(windowEventHandler)
 

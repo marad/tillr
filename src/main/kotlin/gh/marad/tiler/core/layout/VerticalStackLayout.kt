@@ -2,8 +2,8 @@ package gh.marad.tiler.core.layout
 
 import gh.marad.tiler.core.Windows
 
-class VerticalStackLayout(private var space: LayoutSpace) : Layout {
-    override fun retile(windows: Windows): Windows {
+class VerticalStackLayout : Layout {
+    override fun retile(windows: Windows, space: LayoutSpace): Windows {
         if (windows.isEmpty()) return emptyList()
 
         var posY = space.y
@@ -18,9 +18,5 @@ class VerticalStackLayout(private var space: LayoutSpace) : Layout {
                 posY += height
             }
         }
-    }
-
-    override fun updateSpace(space: LayoutSpace) {
-        this.space = space
     }
 }

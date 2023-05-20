@@ -1,5 +1,7 @@
 package gh.marad.tiler.core
 
+import gh.marad.tiler.core.layout.LayoutSpace
+
 sealed interface TilerCommand
 
 /**
@@ -44,5 +46,7 @@ data class Window(val id: WindowId,
 }
 
 data class DesktopState(
-    val windows: Windows,
+    val layoutSpace: LayoutSpace,
+    val allWindows: Windows,
+    val windowsToManage: Windows,
 )

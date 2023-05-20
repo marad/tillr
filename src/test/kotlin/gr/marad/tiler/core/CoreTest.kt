@@ -15,11 +15,7 @@ import org.junit.jupiter.api.Test
 data class TestWindowId(val id: String): WindowId
 
 class TestLayout : Layout {
-    override fun updateSpace(space: LayoutSpace) {
-        TODO("Not yet implemented")
-    }
-
-    override fun retile(windows: Windows): Windows {
+    override fun retile(windows: Windows, space: LayoutSpace): Windows {
         TODO("Not implemented")
     }
 }
