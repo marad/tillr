@@ -46,7 +46,6 @@ fun executeCommand(it: TilerCommand) = when(it) {
 }
 
 fun List<TilerCommand>.execute() = forEach { executeCommand(it) }
-fun List<TilerCommand>.debug() = also(::println)
 
 val ignoredEvents = arrayOf(
     EVENT_OBJECT_LOCATIONCHANGE, EVENT_OBJECT_NAMECHANGE, EVENT_SYSTEM_CAPTURESTART,

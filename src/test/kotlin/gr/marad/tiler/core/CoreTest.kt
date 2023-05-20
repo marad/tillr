@@ -50,13 +50,6 @@ val windowGen = arbitrary { rs ->
     Window(windowIdGen.next(rs), windowTitles.next(rs), classNames.next(rs), "exe_path", posGen.next(rs), isMinimized = false, isMaximized = false, isPopup = false)
 }
 
-fun window(title: String? = null, className: String? = null, position: WindowPosition? = null): Window {
-    val finalTitle = title ?: windowTitles.next()
-    val finalClassName = className ?: classNames.next()
-    val finalPosition = position ?: posGen.next()
-    return Window(windowIdGen.next(), finalTitle, finalClassName, "exe_path", finalPosition, isMinimized = false, isMaximized = false, isPopup = false)
-}
-
 class CoreTest {
     @Test
     fun `should set window position if it changes`() {
