@@ -1,14 +1,18 @@
 package gh.marad.tiler.winapi
 
+import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.platform.win32.User32
+import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.platform.win32.WinDef.HWND
 import com.sun.jna.platform.win32.WinDef.POINT
 import com.sun.jna.platform.win32.WinUser.MSG
 import com.sun.jna.platform.win32.WinUser.WM_QUIT
+import com.sun.jna.win32.W32APIOptions
 import java.awt.Point
 
 private val u32 = User32.INSTANCE
+private val myU32 = Native.load("user32", MyUser32::class.java, W32APIOptions.DEFAULT_OPTIONS)
 
 
 fun activeWindow(): Window = Window(u32.GetForegroundWindow())

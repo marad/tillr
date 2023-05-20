@@ -10,5 +10,6 @@ class ExStyle(val exStyle: Int) {
     fun noActivate() = check(WS_EX_NOACTIVATE)
     fun toolWindow() = check(WS_EX_TOOLWINDOW)
     fun topmost() = check(WS_EX_TOPMOST)
+    fun windowEdge() = check(WS_EX_WINDOWEDGE)
     private fun check(flag: Int): Boolean = (exStyle and flag) == flag
 }

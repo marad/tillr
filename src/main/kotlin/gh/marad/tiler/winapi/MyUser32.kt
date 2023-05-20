@@ -12,4 +12,7 @@ interface MyUser32 : StdCallLibrary, WinUser, WinNT {
     fun RealGetWindowClassW(handle: WinDef.HWND, className: CharArray, maxNameLength: WinDef.UINT): WinDef.UINT
     fun GetWindowThreadProcessId(hwnd: WinDef.HWND, handle: IntByReference): WinDef.DWORD
     fun WindowFromPoint(point: WinDef.POINT?): WinDef.HWND?
+
+    fun ScreenToClient(hwnd: WinDef.HWND?, point: WinDef.POINT?)
+    fun ClientToScreen(hwnd: WinDef.HWND?, point: WinDef.POINT?)
 }

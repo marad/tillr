@@ -8,6 +8,7 @@ private val u32 = User32.INSTANCE
 
 object Monitors {
     fun primary(): MonitorInfo = list().find { it.isPrimary }!!
+    fun count() = User32.INSTANCE.GetSystemMetrics(User32.SM_CMONITORS)
     fun list(): List<MonitorInfo> {
         val monitors = mutableListOf<MonitorInfo>()
         val listMonitors =
@@ -24,9 +25,7 @@ object Monitors {
                 )
                 0
             }
-        u32.EnumDisplayMonitors(null, null, listMonitors
-            , WinDef.LPARAM(0)
-        )
+        u32.EnumDisplayMonitors(null, null, listMonitors , WinDef.LPARAM(0))
         return monitors
     }
 }

@@ -12,7 +12,7 @@ class Process(val processId: Int) : Closeable {
 
     init {
         if (Pointer.NULL == handle) {
-            System.err.println("Failed to open process $processId")
+            throw RuntimeException("Failed to open process $processId")
         }
     }
 

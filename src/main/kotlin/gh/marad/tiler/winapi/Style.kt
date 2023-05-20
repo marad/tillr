@@ -8,5 +8,6 @@ class Style(val style: Int) {
     fun child() = check(WinUser.WS_CHILD)
     fun dlgFrame() = check(WinUser.WS_DLGFRAME)
     fun popupWindow() = check(WinUser.WS_POPUP)
+    fun sysMenu() = check(WinUser.WS_SYSMENU)
     private fun check(flag: Int): Boolean = (style and flag) == flag
 }
