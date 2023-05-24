@@ -3,6 +3,7 @@ import gh.marad.tiler.winapi.Hotkeys
 import gh.marad.tiler.core.*
 import gh.marad.tiler.core.filteringrules.FilteringRules
 import gh.marad.tiler.core.filteringrules.Rule
+import gh.marad.tiler.core.layout.GapLayoutProxy
 import gh.marad.tiler.core.layout.TwoColumnLayout
 import gh.marad.tiler.core.views.ViewManager
 import gh.marad.tiler.navigation.windowDown
@@ -12,12 +13,13 @@ import gh.marad.tiler.navigation.windowUp
 import gh.marad.tiler.winapi.*
 import gh.marad.tiler.windowstiler.*
 
-// TODO better layouts (eg. borders, customizable ratios, BSP layout)
+// TODO better layouts (eg. customizable ratios, BSP layout)
 // TODO allow for external configuration
 // TODO hotkey to quickly activate/deactivate tiling
 // TODO GH Actions CI/CD
 // TODO installation script
 // TODO handle multiple monitors
+// TODO ignore admin windows (https://stackoverflow.com/a/24144277)
 
 fun main() {
     val filteringRules = FilteringRules()
@@ -28,7 +30,7 @@ fun main() {
         Rule.ignoreIf { it.className == "ApplicationFrameTitleBarWindow" },
     ))
 
-    val layout = TwoColumnLayout()
+    val layout = GapLayoutProxy(30, TwoColumnLayout())
 //    val layout = OverlappingCascadeLayout(50)
     val viewManager = ViewManager { layout }
     val windowsTiler = WindowsTiler(viewManager) { getDesktopState(filteringRules) }

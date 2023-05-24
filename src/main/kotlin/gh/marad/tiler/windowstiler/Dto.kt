@@ -22,7 +22,7 @@ fun OsWindow.toTilerWindow() = TilerWindow(
     WID(handle),
     getTitle(),
     getRealClassName(),
-    getProcess().exePath(),
+    try { getProcess().exePath() } catch (e: Exception) { "" },
     getPos().toPosition().removeInvisibleBorders(windowBorders(handle)),
     isMinimized(),
     isMaximized(),

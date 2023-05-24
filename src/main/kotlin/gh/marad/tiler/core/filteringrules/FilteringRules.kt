@@ -29,6 +29,7 @@ class FilteringRules {
         val CoreRules = arrayOf(
             Rule.ignoreIf { it.isPopup || it.isMinimized },
             Rule.ignoreIf { it.exeName == "idea64.exe" && it.windowName.isBlank() },
+            Rule.ignoreIf { it.exeName == "PowerToys.MeasureToolUI.exe" || it.exeName == "PowerToys.Settings.exe" },
         )
     }
 }

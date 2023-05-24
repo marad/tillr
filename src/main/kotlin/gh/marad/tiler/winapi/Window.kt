@@ -43,7 +43,7 @@ data class Window(val handle: WinDef.HWND) {
     fun getPos(): Rectangle {
         val rect = WinDef.RECT()
         if (!u32.GetWindowRect(handle, rect)) {
-            System.err.println("Couldn't get window $handle position")
+            throw RuntimeException("Couldn't get window $handle position")
         }
         return rect.toRectangle()
     }
