@@ -13,7 +13,6 @@ import gh.marad.tiler.navigation.windowUp
 import gh.marad.tiler.winapi.*
 import gh.marad.tiler.windowstiler.*
 
-// TODO better layouts (eg. customizable ratios, BSP layout)
 // TODO allow for external configuration
 // TODO hotkey to quickly activate/deactivate tiling
 // TODO GH Actions CI/CD
@@ -30,7 +29,8 @@ fun main() {
         Rule.ignoreIf { it.className == "ApplicationFrameTitleBarWindow" },
     ))
 
-    val layout = GapLayoutProxy(30, TwoColumnLayout())
+    val twoColumnLayout = TwoColumnLayout(0.55f)
+    val layout = GapLayoutProxy(20, twoColumnLayout)
 //    val layout = OverlappingCascadeLayout(50)
     val viewManager = ViewManager { layout }
     val windowsTiler = WindowsTiler(viewManager) { getDesktopState(filteringRules) }
@@ -38,12 +38,12 @@ fun main() {
     val tilerProc = generateEventProcedure(windowEventHandler)
 
     windowsTiler.initializeWithOpenWindows().execute()
-    configureHotkeys(windowsTiler)
+    configureHotkeys(windowsTiler, twoColumnLayout)
     User32.INSTANCE.SetWinEventHook(EVENT_MIN, EVENT_MAX, null, tilerProc, 0, 0, 0)
     windowsMainLoop()
 }
 
-private fun configureHotkeys(windowsTiler: WindowsTiler) {
+private fun configureHotkeys(windowsTiler: WindowsTiler, layout: TwoColumnLayout) {
     // desktop switching keys
     val hotkeys = Hotkeys()
     (0..8).forEach { viewId ->
@@ -73,5 +73,15 @@ private fun configureHotkeys(windowsTiler: WindowsTiler) {
             selectWindow(activeWindow(), visibleWindows)
                 ?.let { User32.INSTANCE.SetForegroundWindow(it.handle) }
         }
+    }
+
+    hotkeys.register("S-A-L") {
+        layout.increaseRatio(0.05f)
+        windowsTiler.retile().execute()
+    }
+
+    hotkeys.register("S-A-H") {
+        layout.decreaseRatio(0.05f)
+        windowsTiler.retile().execute()
     }
 }
