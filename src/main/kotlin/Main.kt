@@ -41,7 +41,7 @@ fun main() {
     val windowEventHandler = WindowEventHandler(viewManager, windowsTiler, filteringRules, ::windowsUnderCursor)
     val tilerProc = generateEventProcedure(windowEventHandler)
 
-    val trayIcon: TrayIcon = createTrayIcon(windowsTiler)
+    @Suppress("UNUSED_VARIABLE") val trayIcon: TrayIcon = createTrayIcon(windowsTiler)
 
     windowsTiler.initializeWithOpenWindows().execute()
     configureHotkeys(windowsTiler, twoColumnLayout)
