@@ -12,6 +12,10 @@ import gh.marad.tiler.navigation.windowRight
 import gh.marad.tiler.navigation.windowUp
 import gh.marad.tiler.winapi.*
 import gh.marad.tiler.windowstiler.*
+import java.awt.SystemTray
+import java.awt.Toolkit
+import java.awt.TrayIcon
+import kotlin.system.exitProcess
 
 // TODO allow for external configuration
 // TODO hotkey to quickly activate/deactivate tiling
@@ -37,10 +41,46 @@ fun main() {
     val windowEventHandler = WindowEventHandler(viewManager, windowsTiler, filteringRules, ::windowsUnderCursor)
     val tilerProc = generateEventProcedure(windowEventHandler)
 
+    val trayIcon: TrayIcon = createTrayIcon(windowsTiler)
+
     windowsTiler.initializeWithOpenWindows().execute()
     configureHotkeys(windowsTiler, twoColumnLayout)
     User32.INSTANCE.SetWinEventHook(EVENT_MIN, EVENT_MAX, null, tilerProc, 0, 0, 0)
     windowsMainLoop()
+}
+
+private fun createTrayIcon(windowsTiler: WindowsTiler): TrayIcon {
+    val icon = Toolkit.getDefaultToolkit().getImage(WindowsTiler::class.java.getResource("/icon.png"))
+    val stopped = Toolkit.getDefaultToolkit().getImage(WindowsTiler::class.java.getResource("/stopped_icon.png"))
+    val trayIcon = TrayIcon(icon, "Tiler")
+    trayIcon.isImageAutoSize = true
+    trayIcon.addActionListener {
+        println("Event: ${it.actionCommand}")
+    }
+
+    trayIcon.addMouseListener(object : java.awt.event.MouseAdapter() {
+        override fun mouseClicked(e: java.awt.event.MouseEvent?) {
+            if (e?.button == java.awt.event.MouseEvent.BUTTON1) {
+                if (trayIcon.image == stopped) {
+                    trayIcon.image = icon
+                    windowsTiler.enabled = true
+                    windowsTiler.retile().execute()
+                } else {
+                    trayIcon.image = stopped
+                    windowsTiler.enabled = false
+                }
+            }
+        }
+    })
+
+    val popupMenu = java.awt.PopupMenu()
+    popupMenu.add(java.awt.MenuItem("Exit")).addActionListener {
+        exitProcess(0)
+    }
+    trayIcon.popupMenu = popupMenu
+
+    SystemTray.getSystemTray().add(trayIcon)
+    return trayIcon
 }
 
 private fun configureHotkeys(windowsTiler: WindowsTiler, layout: TwoColumnLayout) {
