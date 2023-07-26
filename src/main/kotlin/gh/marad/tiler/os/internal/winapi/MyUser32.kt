@@ -7,7 +7,7 @@ import com.sun.jna.platform.win32.WinUser
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.win32.StdCallLibrary
 
-@Suppress("unused")
+@Suppress("unused", "FunctionName")
 interface MyUser32 : StdCallLibrary, WinUser, WinNT {
     fun IsIconic(hwnd: WinDef.HWND?): Boolean
     fun IsZoomed(hwnd: WinDef.HWND?): Boolean

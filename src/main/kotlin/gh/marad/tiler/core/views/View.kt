@@ -13,10 +13,6 @@ class View(
     fun windowToActivate(): WindowId? =
         activeWindow ?: windows.firstOrNull()
 
-    fun activeWindow(windowId: WindowId) {
-        activeWindow = windowId
-    }
-
     fun addWindow(windowId: WindowId) {
         if (!windows.contains(windowId)) {
             windows.add(windowId)
@@ -51,6 +47,4 @@ class View(
         windows[aIdx] = windows[bIdx]
         windows[bIdx] = tmp
     }
-
-    fun debugGetWindowsInView(): List<WindowId> = windows
 }

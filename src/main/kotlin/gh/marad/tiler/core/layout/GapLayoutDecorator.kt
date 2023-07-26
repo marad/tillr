@@ -4,8 +4,8 @@ import gh.marad.tiler.core.Windows
 import gh.marad.tiler.core.addGap
 
 class GapLayoutDecorator(private val gapSize: Int,
-                         private val proxiedLayout: Layout) : Layout {
+                         private val wrappedLayout: Layout) : Layout {
     override fun retile(windows: Windows, space: LayoutSpace): Windows {
-        return addGap(proxiedLayout.retile(windows, space), gapSize)
+        return addGap(wrappedLayout.retile(windows, space), gapSize)
     }
 }

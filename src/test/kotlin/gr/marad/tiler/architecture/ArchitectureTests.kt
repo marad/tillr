@@ -9,8 +9,8 @@ import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes
 import org.junit.jupiter.api.Test
 
 class ArchitectureTests {
-    val classes = ClassFileImporter().importPackages("gh.marad.tiler..")
-    val modules = getModules(classes)
+    private val classes: JavaClasses = ClassFileImporter().importPackages("gh.marad.tiler..")
+    private val modules = getModules(classes)
 
     @Test
     fun `should not include internal classes of other modules`() {

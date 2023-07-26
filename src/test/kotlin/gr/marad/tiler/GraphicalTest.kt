@@ -126,16 +126,16 @@ fun init(windowHandle: Long) {
         if (key == GLFW_KEY_A && action == GLFW_PRESS) {
             val windowID = testIdGen.next()
             val wnd = Window(TestWindowId(windowID), "Name", "class", "exe_path", posGen2.next(), isMinimized = false, isMaximized = false, isPopup = false)
-            colors.put(windowID, paintGen.next())
+            colors[windowID] = paintGen.next()
             desktopWindows.add(WindowInfo(wnd, false))
-            val cmds = eventHandler.windowAppeared(wnd)
+             eventHandler.windowAppeared(wnd)
         }
 
         if (key == GLFW_KEY_D && action == GLFW_PRESS) {
             val windowAtCursor = getWindowAt(mouseX, mouseY) ?: desktopWindows.lastOrNull()?.window
             if (windowAtCursor != null) {
                 desktopWindows.removeIf { windowAtCursor== it.window }
-                val cmds = eventHandler.windowDisappeared(windowAtCursor)
+                 eventHandler.windowDisappeared(windowAtCursor)
             }
         }
 
@@ -166,8 +166,7 @@ fun init(windowHandle: Long) {
 
         if (key in GLFW_KEY_0..GLFW_KEY_9 && action == GLFW_PRESS) {
             val viewId = key - GLFW_KEY_0 - 1
-            val cmds = viewSwitcher.switchToView(viewId)
-            applyCommands(cmds)
+            viewSwitcher.switchToView(viewId)
         }
 
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
@@ -190,16 +189,12 @@ fun init(windowHandle: Long) {
 }
 
 fun getWindowAt(x: Int, y: Int): Window? {
-    return desktopWindows.filter {
+    return desktopWindows.singleOrNull {
         val pos = it.window.position
         !it.minimized &&
                 x >= pos.x && x <= pos.x + pos.width &&
                 y >= pos.y && y <= pos.y + pos.height
-    }.singleOrNull()?.window
-}
-
-
-fun applyCommands(cmds: List<TilerCommand>) {
+    }?.window
 }
 
 
@@ -294,7 +289,7 @@ fun main() {
         )
 
         println("Retiling!")
-        applyCommands(tiler.retile())
+        os.execute(tiler.retile())
     }
 
     init(windowHandle)

@@ -46,12 +46,12 @@ class Hotkeys : HotkeyListener {
     fun register(shortcutText: String, handler: Handler): Boolean {
         val id = handlers.size + 1
         val shortcut = Shortcut.parse(shortcutText)
-        if (shortcut == null) {
-            return false
+        return if (shortcut == null) {
+            false
         } else {
             handlers.add(handler)
             JIntellitype.getInstance().registerHotKey(id, shortcut.modifiers, shortcut.key)
-            return true
+            true
         }
     }
 

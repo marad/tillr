@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package gh.marad.tiler.os.internal.winapi
 
 import com.sun.jna.platform.win32.WinDef
