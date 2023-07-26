@@ -1,4 +1,4 @@
-package gh.marad.tiler.winapi
+package gh.marad.tiler.os.internal.winapi
 
 import com.sun.jna.Pointer
 import com.sun.jna.platform.win32.Kernel32

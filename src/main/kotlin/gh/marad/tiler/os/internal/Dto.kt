@@ -1,14 +1,14 @@
-package gh.marad.tiler.windowstiler
+package gh.marad.tiler.os.internal
 
 import com.sun.jna.platform.win32.WinDef
 import gh.marad.tiler.core.WindowId
 import gh.marad.tiler.core.WindowPosition
 import gh.marad.tiler.core.layout.LayoutSpace
-import gh.marad.tiler.winapi.WindowBorders
-import gh.marad.tiler.winapi.windowBorders
+import gh.marad.tiler.os.internal.winapi.WindowBorders
+import gh.marad.tiler.os.internal.winapi.windowBorders
 import java.awt.Rectangle
 import gh.marad.tiler.core.Window as TilerWindow
-import gh.marad.tiler.winapi.Window as OsWindow
+import gh.marad.tiler.os.internal.winapi.Window as OsWindow
 
 data class WID(val handle: WinDef.HWND): WindowId
 

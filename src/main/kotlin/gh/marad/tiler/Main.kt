@@ -1,20 +1,18 @@
 package gh.marad.tiler
 
-import com.sun.jna.platform.win32.User32
-import gh.marad.tiler.winapi.Hotkeys
-import gh.marad.tiler.core.*
+import gh.marad.tiler.core.WindowEventHandler
+import gh.marad.tiler.core.WindowsTiler
 import gh.marad.tiler.core.filteringrules.FilteringRules
 import gh.marad.tiler.core.filteringrules.Rule
 import gh.marad.tiler.core.layout.GapLayoutDecorator
-import gh.marad.tiler.core.layout.Layout
 import gh.marad.tiler.core.layout.TwoColumnLayout
 import gh.marad.tiler.core.views.ViewManager
 import gh.marad.tiler.navigation.windowDown
 import gh.marad.tiler.navigation.windowLeft
 import gh.marad.tiler.navigation.windowRight
 import gh.marad.tiler.navigation.windowUp
-import gh.marad.tiler.winapi.*
-import gh.marad.tiler.windowstiler.*
+import gh.marad.tiler.os.OsFacade
+import gh.marad.tiler.os.OsFactory
 import java.awt.SystemTray
 import java.awt.Toolkit
 import java.awt.TrayIcon
@@ -56,28 +54,24 @@ fun main() {
         Rule.ignoreIf { it.className == "ApplicationFrameTitleBarWindow" },
     ))
 
+    val os = OsFactory().create()
+
     val twoColumnLayout = TwoColumnLayout(0.55f)
     val layout = GapLayoutDecorator(20, twoColumnLayout)
 //    val layout = OverlappingCascadeLayout(50)
     val viewManager = ViewManager { layout }
-    val windowsTiler = WindowsTiler(viewManager) { getDesktopState(filteringRules) }
-    windowsTiler.initializeWithOpenWindows().execute()
+    val windowsTiler = WindowsTiler(viewManager) { os.getDesktopState(filteringRules) }
+    os.execute(windowsTiler.initializeWithOpenWindows())
 
-    @Suppress("UNUSED_VARIABLE") val trayIcon: TrayIcon = createTrayIcon(windowsTiler)
-    configureHotkeys(windowsTiler, twoColumnLayout)
+    @Suppress("UNUSED_VARIABLE") val trayIcon: TrayIcon = createTrayIcon(os, windowsTiler)
+    configureHotkeys(windowsTiler, twoColumnLayout, os)
 
     // TODO event handler można zastąpić jakimś event bus'em
-    val windowEventHandler = WindowEventHandler(viewManager, windowsTiler, filteringRules, ::windowsUnderCursor)
-    tilerMainLoop(windowEventHandler)
+    val windowEventHandler = WindowEventHandler(viewManager, windowsTiler, filteringRules, os)
+    os.startEventHandling(windowEventHandler)
 }
 
-fun tilerMainLoop(windowEventHandler: WindowEventHandler) {
-    val tilerProc = generateEventProcedure(windowEventHandler)
-    User32.INSTANCE.SetWinEventHook(EVENT_MIN, EVENT_MAX, null, tilerProc, 0, 0, 0)
-    windowsMainLoop()
-}
-
-fun createTrayIcon(windowsTiler: WindowsTiler): TrayIcon {
+fun createTrayIcon(os: OsFacade, windowsTiler: WindowsTiler): TrayIcon {
     val icon = Toolkit.getDefaultToolkit().getImage(WindowsTiler::class.java.getResource("/icon.png"))
     val stopped = Toolkit.getDefaultToolkit().getImage(WindowsTiler::class.java.getResource("/stopped_icon.png"))
     val trayIcon = TrayIcon(icon, "Tiler")
@@ -92,7 +86,7 @@ fun createTrayIcon(windowsTiler: WindowsTiler): TrayIcon {
                 if (trayIcon.image == stopped) {
                     trayIcon.image = icon
                     windowsTiler.enabled = true
-                    windowsTiler.retile().execute()
+                    os.execute(windowsTiler.retile())
                 } else {
                     trayIcon.image = stopped
                     windowsTiler.enabled = false
@@ -111,22 +105,21 @@ fun createTrayIcon(windowsTiler: WindowsTiler): TrayIcon {
     return trayIcon
 }
 
-private fun configureHotkeys(windowsTiler: WindowsTiler, layout: TwoColumnLayout) {
+private fun configureHotkeys(windowsTiler: WindowsTiler, layout: TwoColumnLayout, os: OsFacade) {
     // desktop switching keys
-    val hotkeys = Hotkeys()
     (0..8).forEach { viewId ->
-        hotkeys.register("A-${viewId + 1}") {
-            windowsTiler.switchToView(viewId).execute()
+        os.registerHotkey("A-${viewId + 1}") {
+            os.execute(windowsTiler.switchToView(viewId))
         }
 
-        hotkeys.register("S-A-${viewId + 1}") {
-            windowsTiler.moveWindow(activeWindow().toTilerWindow(), viewId).execute()
-            windowsTiler.switchToView(viewId).execute()
+        os.registerHotkey("S-A-${viewId + 1}") {
+            os.execute(windowsTiler.moveWindow(os.activeWindow(), viewId))
+            os.execute(windowsTiler.switchToView(viewId))
         }
     }
 
-    hotkeys.register("A-E") {
-        windowsTiler.switchToPreviousView().execute()
+    os.registerHotkey("A-E") {
+        os.execute(windowsTiler.switchToPreviousView())
     }
 
     // window navigation keys
@@ -136,20 +129,20 @@ private fun configureHotkeys(windowsTiler: WindowsTiler, layout: TwoColumnLayout
         "J" to ::windowDown,
         "K" to ::windowUp
     ).forEach { (key, selectWindow) ->
-        hotkeys.register("A-$key") {
-            val visibleWindows = listWindows().filterNot { it.isMinimized() }
-            selectWindow(activeWindow(), visibleWindows)
-                ?.let { User32.INSTANCE.SetForegroundWindow(it.handle) }
+        os.registerHotkey("A-$key") {
+            val visibleWindows = os.listWindows().filterNot { it.isMinimized }
+            selectWindow(os.activeWindow(), visibleWindows)
+                ?.let { os.setActiveWindow(it.id) }
         }
     }
 
-    hotkeys.register("S-A-L") {
+    os.registerHotkey("S-A-L") {
         layout.increaseRatio(0.05f)
-        windowsTiler.retile().execute()
+        os.execute(windowsTiler.retile())
     }
 
-    hotkeys.register("S-A-H") {
+    os.registerHotkey("S-A-H") {
         layout.decreaseRatio(0.05f)
-        windowsTiler.retile().execute()
+        os.execute(windowsTiler.retile())
     }
 }
