@@ -40,8 +40,7 @@ data class Window(val id: WindowId,
             y = y ?: position.y,
             width = width ?: position.width,
             height = height ?: position.height
-        )
-        )
+        ))
     }
 }
 

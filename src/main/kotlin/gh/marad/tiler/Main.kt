@@ -1,9 +1,12 @@
+package gh.marad.tiler
+
 import com.sun.jna.platform.win32.User32
 import gh.marad.tiler.winapi.Hotkeys
 import gh.marad.tiler.core.*
 import gh.marad.tiler.core.filteringrules.FilteringRules
 import gh.marad.tiler.core.filteringrules.Rule
-import gh.marad.tiler.core.layout.GapLayoutProxy
+import gh.marad.tiler.core.layout.GapLayoutDecorator
+import gh.marad.tiler.core.layout.Layout
 import gh.marad.tiler.core.layout.TwoColumnLayout
 import gh.marad.tiler.core.views.ViewManager
 import gh.marad.tiler.navigation.windowDown
@@ -23,6 +26,26 @@ import kotlin.system.exitProcess
 // TODO installation script
 // TODO handle multiple monitors
 // TODO ignore admin windows (https://stackoverflow.com/a/24144277)
+// TODO handle fullscreen windows
+// TODO window showing registered hotkeys
+// TODO status toolbar showing current desktop
+// TODO [maybe] widgets for status toolbar
+
+
+/**
+ * Notatki o wykorzystaniu KScript
+ * Aktualne API wydaje się być trochę bałaganiarskie. Tworzenie poszczególnych elementów
+ * jest zagmatwane i nieliniowe.
+ *
+ * Chciałbym aby użytkownik API mógł w prosty sposób skonfigurować to co dla niego istotne:
+ * - jakie okna mają być ignorowane/zarządzane (reguły filtrowania)
+ * - skróty klawiszowe
+ * - używany layout - idealnie jeśli użytkownik mógłby użyć jakiś swój
+ * - potencjalnie mógłby też chcieć zapiąć się na eventy okien lub z tilera
+ *
+ * Wydaje się, że żeby to umożliwić trzeba utworzyć jakieś jedno spójne API,
+ * które będzie interfejsem dla użytkownika do konfiguracji tych wszystkich rzeczy.
+ */
 
 fun main() {
     val filteringRules = FilteringRules()
@@ -34,22 +57,27 @@ fun main() {
     ))
 
     val twoColumnLayout = TwoColumnLayout(0.55f)
-    val layout = GapLayoutProxy(20, twoColumnLayout)
+    val layout = GapLayoutDecorator(20, twoColumnLayout)
 //    val layout = OverlappingCascadeLayout(50)
     val viewManager = ViewManager { layout }
     val windowsTiler = WindowsTiler(viewManager) { getDesktopState(filteringRules) }
-    val windowEventHandler = WindowEventHandler(viewManager, windowsTiler, filteringRules, ::windowsUnderCursor)
-    val tilerProc = generateEventProcedure(windowEventHandler)
+    windowsTiler.initializeWithOpenWindows().execute()
 
     @Suppress("UNUSED_VARIABLE") val trayIcon: TrayIcon = createTrayIcon(windowsTiler)
-
-    windowsTiler.initializeWithOpenWindows().execute()
     configureHotkeys(windowsTiler, twoColumnLayout)
+
+    // TODO event handler można zastąpić jakimś event bus'em
+    val windowEventHandler = WindowEventHandler(viewManager, windowsTiler, filteringRules, ::windowsUnderCursor)
+    tilerMainLoop(windowEventHandler)
+}
+
+fun tilerMainLoop(windowEventHandler: WindowEventHandler) {
+    val tilerProc = generateEventProcedure(windowEventHandler)
     User32.INSTANCE.SetWinEventHook(EVENT_MIN, EVENT_MAX, null, tilerProc, 0, 0, 0)
     windowsMainLoop()
 }
 
-private fun createTrayIcon(windowsTiler: WindowsTiler): TrayIcon {
+fun createTrayIcon(windowsTiler: WindowsTiler): TrayIcon {
     val icon = Toolkit.getDefaultToolkit().getImage(WindowsTiler::class.java.getResource("/icon.png"))
     val stopped = Toolkit.getDefaultToolkit().getImage(WindowsTiler::class.java.getResource("/stopped_icon.png"))
     val trayIcon = TrayIcon(icon, "Tiler")

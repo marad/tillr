@@ -2,12 +2,14 @@ plugins {
     kotlin("jvm") version "1.8.20"
     application
     id("pl.allegro.tech.build.axion-release") version "1.15.0"
+    id("maven-publish")
 }
 
 group = "gh.marad.tiler"
 version = scmVersion.version
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven("https://packages.jetbrains.team/maven/p/skija/maven")
 }
@@ -41,4 +43,12 @@ kotlin {
 
 application {
     mainClass.set("MainKt")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
 }

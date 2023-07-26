@@ -1,4 +1,4 @@
-package gh.marad.tiler
+package gh.marad.tiler.tools
 
 import com.sun.jna.platform.win32.User32
 import gh.marad.tiler.winapi.DwmApi
