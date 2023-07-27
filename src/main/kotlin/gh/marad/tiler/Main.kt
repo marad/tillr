@@ -16,6 +16,7 @@ import gh.marad.tiler.os.OsFactory
 import java.awt.SystemTray
 import java.awt.Toolkit
 import java.awt.TrayIcon
+import java.util.logging.Logger
 import kotlin.system.exitProcess
 
 // TODO allow for external configuration
@@ -77,7 +78,7 @@ fun createTrayIcon(os: OsFacade, windowsTiler: WindowsTiler): TrayIcon {
     val trayIcon = TrayIcon(icon, "Tiler")
     trayIcon.isImageAutoSize = true
     trayIcon.addActionListener {
-        println("Event: ${it.actionCommand}")
+        Logger.getLogger("createTrayIcon").info("Event: ${it.actionCommand}")
     }
 
     trayIcon.addMouseListener(object : java.awt.event.MouseAdapter() {
@@ -97,7 +98,7 @@ fun createTrayIcon(os: OsFacade, windowsTiler: WindowsTiler): TrayIcon {
 
     val popupMenu = java.awt.PopupMenu()
     popupMenu.add(java.awt.MenuItem("Exit")).addActionListener {
-        exitProcess(0)
+        System.exit(0)
     }
     trayIcon.popupMenu = popupMenu
 

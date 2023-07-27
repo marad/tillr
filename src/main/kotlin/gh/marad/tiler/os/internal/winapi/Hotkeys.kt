@@ -2,7 +2,7 @@ package gh.marad.tiler.os.internal.winapi
 
 import com.melloware.jintellitype.HotkeyListener
 import com.melloware.jintellitype.JIntellitype
-import kotlin.system.exitProcess
+import org.slf4j.LoggerFactory
 
 typealias Handler = () -> Unit
 
@@ -31,11 +31,12 @@ data class Shortcut(val modifiers: Int, val key: Int) {
 
 class Hotkeys : HotkeyListener {
     private val handlers = arrayListOf<Handler>()
+    private val logger = LoggerFactory.getLogger(Hotkeys::class.java)
 
     init {
         if (!JIntellitype.isJIntellitypeSupported()) {
-            System.err.println("Intellitype is not supported - can't register any hotkeys!")
-            exitProcess(1)
+            logger.error("Intellitype is not supported - can't register any hotkeys!")
+            System.exit(1)
         }
         val it = JIntellitype.getInstance()
         it.registerHotKey(1, JIntellitype.MOD_ALT, '1'.code)

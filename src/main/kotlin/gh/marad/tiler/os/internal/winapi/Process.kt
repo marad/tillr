@@ -12,7 +12,7 @@ class Process(processId: Int) : Closeable {
 
     init {
         if (Pointer.NULL == handle) {
-            throw RuntimeException("Failed to open process $processId")
+            throw ProcessOpeningException(processId)
         }
     }
 
@@ -25,5 +25,10 @@ class Process(processId: Int) : Closeable {
 
     override fun close() {
         kernel.CloseHandle(handle)
+    }
+
+    companion object {
+        // FIXME This should probably be moved or proxied to be accessible from outside of this module
+        class ProcessOpeningException(processId: Int) : RuntimeException("Failed to open process $processId")
     }
 }

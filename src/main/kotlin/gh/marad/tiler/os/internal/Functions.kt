@@ -4,6 +4,7 @@ import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.platform.win32.WinUser
 import gh.marad.tiler.core.WindowEventHandler
 import gh.marad.tiler.os.internal.winapi.*
+import org.slf4j.LoggerFactory
 
 val ignoredEvents = arrayOf(
     EVENT_OBJECT_LOCATIONCHANGE, EVENT_OBJECT_NAMECHANGE, EVENT_SYSTEM_CAPTURESTART,
@@ -38,8 +39,8 @@ fun generateEventProcedure(eventHandler: WindowEventHandler): WinUser.WinEventPr
                 else -> {}
             }
         } catch (e: Exception) {
-            println("Error while handling event $event for window $window")
-            e.printStackTrace()
+            val logger = LoggerFactory.getLogger("generateEventProcedure")
+            logger.error("Error while handling event $event for window $window", e)
         }
     }
 }

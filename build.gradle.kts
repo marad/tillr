@@ -19,6 +19,9 @@ dependencies {
     implementation("org.greenrobot:eventbus-java:3.3.1")
     implementation("com.melloware:jintellitype:1.4.1")
 
+    implementation("org.slf4j:slf4j-api:2.0.7")
+    implementation("org.slf4j:slf4j-simple:2.0.7")
+
     testImplementation(kotlin("test"))
     testImplementation("io.kotest:kotest-runner-junit5:5.6.1")
     testImplementation("io.kotest:kotest-property:5.6.1")

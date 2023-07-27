@@ -6,6 +6,7 @@ import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.platform.win32.WinUser
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.win32.W32APIOptions
+import gh.marad.tiler.os.internal.CannotGetWindowPositionException
 import java.awt.Rectangle
 
 private val u32 = User32.INSTANCE
@@ -43,7 +44,7 @@ data class Window(val handle: WinDef.HWND) {
     fun getPos(): Rectangle {
         val rect = WinDef.RECT()
         if (!u32.GetWindowRect(handle, rect)) {
-            throw RuntimeException("Couldn't get window $handle position")
+            throw CannotGetWindowPositionException(handle)
         }
         return rect.toRectangle()
     }
