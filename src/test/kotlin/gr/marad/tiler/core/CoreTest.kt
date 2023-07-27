@@ -1,10 +1,11 @@
 package gr.marad.tiler.core
 
-import gh.marad.tiler.core.*
-import gh.marad.tiler.core.layout.Layout
-import gh.marad.tiler.core.layout.LayoutSpace
-import gh.marad.tiler.core.views.View
-import gh.marad.tiler.core.views.ViewManager
+import gh.marad.tiler.common.layout.Layout
+import gh.marad.tiler.common.layout.LayoutSpace
+import gh.marad.tiler.tiler.internal.views.View
+import gh.marad.tiler.tiler.internal.views.ViewManager
+import gh.marad.tiler.common.*
+import gh.marad.tiler.tiler.internal.createPositionCommands
 import io.kotest.matchers.equals.shouldNotBeEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb

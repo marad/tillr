@@ -78,12 +78,13 @@ class BlocksRestrictAccessToInternalClassesCondition : ArchCondition<Block>("res
 
 }
 
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 data class Block(val javaPackage: JavaPackage) {
     val blockParentPackage = javaPackage.parent.get()
 
     fun internalClasses(): Set<JavaClass> = internalPackage().classesInPackageTree
 
-    fun internalPackage() = println(javaPackage).let { javaPackage.getPackage("internal") }
+    fun internalPackage(): JavaPackage = println(javaPackage).let { javaPackage.getPackage("internal") }
 
     fun dependenciesFromThisBlock(): Set<BlockDependency> {
         return javaPackage.classDependenciesFromThisPackageTree

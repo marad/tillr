@@ -1,6 +1,6 @@
-package gh.marad.tiler.navigation
+package gh.marad.tiler.common.navigation
 
-import gh.marad.tiler.core.Window
+import gh.marad.tiler.common.Window
 import kotlin.math.absoluteValue
 
 fun windowRight(activeWindow: Window, windows: List<Window>): Window? {

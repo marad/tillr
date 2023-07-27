@@ -1,6 +1,6 @@
-package gh.marad.tiler.core.layout
+package gh.marad.tiler.common.layout
 
-import gh.marad.tiler.core.Windows
+import gh.marad.tiler.common.Windows
 
 class TwoColumnLayout(private var ratio: Float = 0.5f) : Layout {
     private var rightColumnLayout = VerticalStackLayout()

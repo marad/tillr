@@ -1,20 +1,4 @@
-package gh.marad.tiler.core
-
-import gh.marad.tiler.core.layout.LayoutSpace
-
-sealed interface TilerCommand
-
-/**
- * Sets window position. It should also un-minimize the window if necessary
- */
-data class SetWindowPosition(val windowId: WindowId, val position: WindowPosition) : TilerCommand
-
-/**
- * Minimizes given window
- */
-data class MinimizeWindow(val windowId: WindowId) : TilerCommand
-data class ShowWindow(val windowId: WindowId) : TilerCommand
-data class ActivateWindow(val windowId: WindowId) : TilerCommand
+package gh.marad.tiler.common
 
 /**
  * Represents a window identifier
@@ -23,7 +7,6 @@ interface WindowId
 typealias Windows = List<Window>
 
 data class WindowPosition(val x: Int, val y: Int, val width: Int, val height: Int)
-
 data class Window(val id: WindowId,
                   val windowName: String,
                   val className: String,
@@ -40,12 +23,7 @@ data class Window(val id: WindowId,
             y = y ?: position.y,
             width = width ?: position.width,
             height = height ?: position.height
-        ))
+        )
+        )
     }
 }
-
-data class DesktopState(
-    val layoutSpace: LayoutSpace,
-    val allWindows: Windows,
-    val windowsToManage: Windows,
-)

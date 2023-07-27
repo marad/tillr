@@ -1,4 +1,4 @@
-package gh.marad.tiler.core.layout
+package gh.marad.tiler.common.layout
 
 data class LayoutSpace(
     val x: Int,

@@ -1,12 +1,15 @@
 package gr.marad.tiler
 
-import gh.marad.tiler.core.*
-import gh.marad.tiler.core.filteringrules.FilteringRules
-import gh.marad.tiler.core.layout.OverlappingCascadeLayout
-import gh.marad.tiler.core.layout.LayoutSpace
-import gh.marad.tiler.core.views.ViewManager
-import gh.marad.tiler.core.views.ViewSwitcher
+import gh.marad.tiler.common.filteringrules.FilteringRules
+import gh.marad.tiler.common.layout.OverlappingCascadeLayout
+import gh.marad.tiler.common.layout.LayoutSpace
+import gh.marad.tiler.tiler.internal.views.ViewManager
+import gh.marad.tiler.tiler.internal.views.ViewSwitcher
 import gh.marad.tiler.os.OsFacade
+import gh.marad.tiler.common.*
+import gh.marad.tiler.os.WindowEventHandler
+import gh.marad.tiler.app.internal.TilerWindowEventHandler
+import gh.marad.tiler.tiler.TilerFacade
 import gr.marad.tiler.core.TestWindowId
 import gr.marad.tiler.core.testIdGen
 import io.kotest.property.Arb
@@ -25,13 +28,9 @@ var mouseY = 0
 var width = 640
 var height = 480
 val filteringRules = FilteringRules()
-//val viewManager = ViewManager { TwoColumnLayout(LayoutSpace(0, 0, width, height)) }
-val viewManager = ViewManager { OverlappingCascadeLayout(20) }
-val viewSwitcher = ViewSwitcher(viewManager) { desktopWindows.toDesktopState() }
-val tiler = WindowsTiler(viewManager) { desktopWindows.toDesktopState() }
 val os = object : OsFacade {
     override fun getDesktopState(filteringRules: FilteringRules): DesktopState {
-        TODO("Not yet implemented")
+        return desktopWindows.toDesktopState()
     }
 
     override fun activeWindow(): Window {
@@ -93,7 +92,8 @@ val os = object : OsFacade {
     }
 
 }
-val eventHandler = WindowEventHandler(viewManager, tiler, filteringRules, os)
+val tiler = TilerFacade.windowsTiler(OverlappingCascadeLayout(20), filteringRules, os)
+val eventHandler = TilerWindowEventHandler(tiler, filteringRules, os)
 
 val xGen2 = Arb.int(0, width -10)
 val yGen2 = Arb.int(0, height -10)
@@ -166,7 +166,7 @@ fun init(windowHandle: Long) {
 
         if (key in GLFW_KEY_0..GLFW_KEY_9 && action == GLFW_PRESS) {
             val viewId = key - GLFW_KEY_0 - 1
-            viewSwitcher.switchToView(viewId)
+            tiler.switchToView(viewId)
         }
 
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {

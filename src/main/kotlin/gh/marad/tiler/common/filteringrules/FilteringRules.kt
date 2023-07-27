@@ -1,6 +1,6 @@
-package gh.marad.tiler.core.filteringrules
+package gh.marad.tiler.common.filteringrules
 
-import gh.marad.tiler.core.Window
+import gh.marad.tiler.common.Window
 
 @Suppress("unused")
 class FilteringRules {

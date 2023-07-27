@@ -2,7 +2,7 @@ package gh.marad.tiler.os.internal
 
 import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.platform.win32.WinUser
-import gh.marad.tiler.core.WindowEventHandler
+import gh.marad.tiler.os.WindowEventHandler
 import gh.marad.tiler.os.internal.winapi.*
 import org.slf4j.LoggerFactory
 

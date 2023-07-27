@@ -1,8 +1,8 @@
-package gh.marad.tiler.core.views
+package gh.marad.tiler.tiler.internal.views
 
-import gh.marad.tiler.core.WindowId
-import gh.marad.tiler.core.Windows
-import gh.marad.tiler.core.layout.Layout
+import gh.marad.tiler.common.WindowId
+import gh.marad.tiler.common.Windows
+import gh.marad.tiler.common.layout.Layout
 
 class View(
     private var windows: MutableList<WindowId> = mutableListOf(),

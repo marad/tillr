@@ -1,7 +1,7 @@
 package gr.marad.tiler.core
 
-import gh.marad.tiler.core.layout.LayoutSpace
-import gh.marad.tiler.core.layout.VerticalStackLayout
+import gh.marad.tiler.common.layout.LayoutSpace
+import gh.marad.tiler.common.layout.VerticalStackLayout
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.property.Arb

@@ -1,23 +1,20 @@
 package gh.marad.tiler
 
-import gh.marad.tiler.core.WindowEventHandler
-import gh.marad.tiler.core.WindowsTiler
-import gh.marad.tiler.core.filteringrules.FilteringRules
-import gh.marad.tiler.core.filteringrules.Rule
-import gh.marad.tiler.core.layout.GapLayoutDecorator
-import gh.marad.tiler.core.layout.TwoColumnLayout
-import gh.marad.tiler.core.views.ViewManager
-import gh.marad.tiler.navigation.windowDown
-import gh.marad.tiler.navigation.windowLeft
-import gh.marad.tiler.navigation.windowRight
-import gh.marad.tiler.navigation.windowUp
+import gh.marad.tiler.app.AppFacade
+import gh.marad.tiler.common.filteringrules.FilteringRules
+import gh.marad.tiler.common.filteringrules.Rule
+import gh.marad.tiler.common.layout.GapLayoutDecorator
+import gh.marad.tiler.common.layout.TwoColumnLayout
+import gh.marad.tiler.common.navigation.windowDown
+import gh.marad.tiler.common.navigation.windowLeft
+import gh.marad.tiler.common.navigation.windowRight
+import gh.marad.tiler.common.navigation.windowUp
 import gh.marad.tiler.os.OsFacade
-import gh.marad.tiler.os.OsFactory
+import gh.marad.tiler.tiler.TilerFacade
 import java.awt.SystemTray
 import java.awt.Toolkit
 import java.awt.TrayIcon
 import java.util.logging.Logger
-import kotlin.system.exitProcess
 
 // TODO allow for external configuration
 // TODO hotkey to quickly activate/deactivate tiling
@@ -55,26 +52,27 @@ fun main() {
         Rule.ignoreIf { it.className == "ApplicationFrameTitleBarWindow" },
     ))
 
-    val os = OsFactory().create()
-
     val twoColumnLayout = TwoColumnLayout(0.55f)
     val layout = GapLayoutDecorator(20, twoColumnLayout)
-//    val layout = OverlappingCascadeLayout(50)
-    val viewManager = ViewManager { layout }
-    val windowsTiler = WindowsTiler(viewManager) { os.getDesktopState(filteringRules) }
-    os.execute(windowsTiler.initializeWithOpenWindows())
 
-    @Suppress("UNUSED_VARIABLE") val trayIcon: TrayIcon = createTrayIcon(os, windowsTiler)
-    configureHotkeys(windowsTiler, twoColumnLayout, os)
+    val os = OsFacade.create()
+    val tiler = TilerFacade.windowsTiler(layout, filteringRules, os)
+    val app = AppFacade.createWindowsApp(os, tiler)
+
+//    os.execute(windowsTiler.initializeWithOpenWindows())
+
+    @Suppress("UNUSED_VARIABLE") val trayIcon: TrayIcon = createTrayIcon(os, tiler)
+    configureHotkeys(tiler, twoColumnLayout, os)
 
     // TODO event handler można zastąpić jakimś event bus'em
-    val windowEventHandler = WindowEventHandler(viewManager, windowsTiler, filteringRules, os)
-    os.startEventHandling(windowEventHandler)
+//    val windowEventHandler = TilerWindowEventHandler(windowsTiler, filteringRules, os)
+//    os.startEventHandling(windowEventHandler)
+    app.start(filteringRules)
 }
 
-fun createTrayIcon(os: OsFacade, windowsTiler: WindowsTiler): TrayIcon {
-    val icon = Toolkit.getDefaultToolkit().getImage(WindowsTiler::class.java.getResource("/icon.png"))
-    val stopped = Toolkit.getDefaultToolkit().getImage(WindowsTiler::class.java.getResource("/stopped_icon.png"))
+fun createTrayIcon(os: OsFacade, windowsTiler: TilerFacade): TrayIcon {
+    val icon = Toolkit.getDefaultToolkit().getImage(AppFacade::class.java.getResource("/icon.png"))
+    val stopped = Toolkit.getDefaultToolkit().getImage(AppFacade::class.java.getResource("/stopped_icon.png"))
     val trayIcon = TrayIcon(icon, "Tiler")
     trayIcon.isImageAutoSize = true
     trayIcon.addActionListener {
@@ -106,7 +104,7 @@ fun createTrayIcon(os: OsFacade, windowsTiler: WindowsTiler): TrayIcon {
     return trayIcon
 }
 
-private fun configureHotkeys(windowsTiler: WindowsTiler, layout: TwoColumnLayout, os: OsFacade) {
+private fun configureHotkeys(windowsTiler: TilerFacade, layout: TwoColumnLayout, os: OsFacade) {
     // desktop switching keys
     (0..8).forEach { viewId ->
         os.registerHotkey("A-${viewId + 1}") {

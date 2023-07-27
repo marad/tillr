@@ -1,7 +1,7 @@
-package gh.marad.tiler.core.views
+package gh.marad.tiler.tiler.internal.views
 
-import gh.marad.tiler.core.WindowId
-import gh.marad.tiler.core.layout.Layout
+import gh.marad.tiler.common.WindowId
+import gh.marad.tiler.common.layout.Layout
 
 class ViewManager(private val defaultLayout: () -> Layout) {
     private var _activeViewId: Int = 0

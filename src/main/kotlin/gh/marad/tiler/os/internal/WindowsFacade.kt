@@ -2,11 +2,12 @@ package gh.marad.tiler.os.internal
 
 import com.sun.jna.platform.win32.User32
 import com.sun.jna.platform.win32.WinDef
-import gh.marad.tiler.core.*
-import gh.marad.tiler.core.Window
-import gh.marad.tiler.core.filteringrules.FilteringRules
+import gh.marad.tiler.common.Window
+import gh.marad.tiler.common.filteringrules.FilteringRules
 import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.os.internal.winapi.*
+import gh.marad.tiler.common.*
+import gh.marad.tiler.os.WindowEventHandler
 import gh.marad.tiler.os.internal.winapi.Window as OsWindow
 
 class WindowsFacade : OsFacade {

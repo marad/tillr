@@ -1,6 +1,6 @@
-package gh.marad.tiler.core.layout
+package gh.marad.tiler.common.layout
 
-import gh.marad.tiler.core.Windows
+import gh.marad.tiler.common.Windows
 
 class VerticalStackLayout : Layout {
     override fun retile(windows: Windows, space: LayoutSpace): Windows {

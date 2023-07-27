@@ -1,8 +1,8 @@
-package gh.marad.tiler.core.views
+package gh.marad.tiler.tiler.internal.views
 
-import gh.marad.tiler.core.DesktopState
-import gh.marad.tiler.core.TilerCommand
-import gh.marad.tiler.core.activateView
+import gh.marad.tiler.common.DesktopState
+import gh.marad.tiler.common.TilerCommand
+import gh.marad.tiler.tiler.internal.activateView
 
 class ViewSwitcher(private val viewManager: ViewManager, val getDesktopState: () -> DesktopState) {
     private var activeView: Int? = null
