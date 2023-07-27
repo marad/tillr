@@ -4,17 +4,16 @@ import com.tngtech.archunit.base.DescribedPredicate
 import com.tngtech.archunit.core.domain.JavaClass
 import com.tngtech.archunit.core.domain.JavaClasses
 import com.tngtech.archunit.core.domain.JavaPackage
-import com.tngtech.archunit.core.importer.ClassFileImporter
+import com.tngtech.archunit.junit.AnalyzeClasses
+import com.tngtech.archunit.junit.ArchTest
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes
-import org.junit.jupiter.api.Test
 
-class ArchitectureTests {
-    private val classes: JavaClasses = ClassFileImporter().importPackages("gh.marad.tiler..")
-    private val modules = getModules(classes)
+@AnalyzeClasses(packages = ["gh.marad.tiler.."])
+class TestModule {
 
-    @Test
-    fun `should not include internal classes of other modules`() {
-        modules.forEach { modulePackage ->
+    @ArchTest
+    fun `should not include internal classes of other modules`(classes: JavaClasses) {
+        getModules(classes).forEach { modulePackage ->
             val rule = classes().that().resideInAPackage("${modulePackage.name}.internal..")
                 .should().onlyBeAccessed().byClassesThat().resideInAPackage("${modulePackage.name}..")
 

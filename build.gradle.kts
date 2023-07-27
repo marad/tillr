@@ -23,7 +23,7 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5:5.6.1")
     testImplementation("io.kotest:kotest-property:5.6.1")
 
-    testImplementation("com.tngtech.archunit:archunit:1.0.1")
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.0.1")
     testImplementation("org.jetbrains.skija:skija-windows:0.93.6")
     testImplementation("org.lwjgl:lwjgl:3.3.2")
     testImplementation("org.lwjgl:lwjgl-opengl:3.3.2")
