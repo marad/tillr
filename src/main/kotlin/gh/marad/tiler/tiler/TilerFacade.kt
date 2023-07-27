@@ -22,9 +22,7 @@ interface TilerFacade {
 
     companion object {
         fun windowsTiler(layout: Layout, filteringRules: FilteringRules, os: OsFacade): TilerFacade {
-            return WindowsTiler(ViewManager { layout }) {
-                os.getDesktopState(filteringRules)
-            }
+            return WindowsTiler(ViewManager { layout }, filteringRules, os)
         }
     }
 }
