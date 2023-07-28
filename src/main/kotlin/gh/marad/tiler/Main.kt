@@ -16,12 +16,11 @@ import java.awt.Toolkit
 import java.awt.TrayIcon
 import java.util.logging.Logger
 
-// TODO allow for external configuration
+// TODO ignore admin windows (https://stackoverflow.com/a/24144277)
 // TODO hotkey to quickly activate/deactivate tiling
+// TODO allow for external configuration
 // TODO GH Actions CI/CD
 // TODO installation script
-// TODO handle multiple monitors
-// TODO ignore admin windows (https://stackoverflow.com/a/24144277)
 // TODO handle fullscreen windows
 // TODO window showing registered hotkeys
 // TODO status toolbar showing current desktop

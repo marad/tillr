@@ -13,9 +13,9 @@ class WindowsOs : OsFacade {
     private val hotkeys = Hotkeys()
 
     override fun getDesktopState(): DesktopState {
-        val space = Monitors.primary().workArea.toLayoutSpace()
+        val monitors = Monitors.list().map { Monitor(it.workArea.toLayoutSpace(), it.isPrimary) }
         val windows = gh.marad.tiler.os.internal.winapi.listWindows().map { it.toTilerWindow() }
-        return DesktopState(space, windows)
+        return DesktopState(monitors, windows)
     }
 
     override fun activeWindow(): Window =

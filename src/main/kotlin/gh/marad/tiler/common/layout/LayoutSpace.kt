@@ -5,4 +5,8 @@ data class LayoutSpace(
     val y: Int,
     val width: Int,
     val height: Int
-)
+) {
+    fun contains(px: Int, py: Int): Boolean {
+        return x <= px && px <= x + width && y <= py && py <= y + height
+    }
+}

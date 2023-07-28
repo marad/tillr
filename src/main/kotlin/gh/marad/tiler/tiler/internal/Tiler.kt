@@ -65,22 +65,38 @@ class Tiler(
         if (!enabled) return emptyList()
         val view = viewManager.currentView()
         val desktopState = os.getDesktopState()
-        return retile(view, desktopState.getManagableWindows(filteringRules), desktopState.layoutSpace)
+        val windows = desktopState.getManagableWindows(filteringRules)
+            .filterNot { it.isMinimized }
+        val assignedWindows = assignWindowsToLayoutSpaces(windows, desktopState.monitors)
+        return assignedWindows.flatMap { retile(view, it.value, it.key) }
     }
 
-    private fun retile(view: View, allWindows: Windows, space: LayoutSpace): List<TilerCommand> {
-        allWindows.filterNot { it.isMinimized }
-            .forEach { view.addWindow(it.id) }
-        val windowsInView = view.filterWindowsInView(allWindows)
-        view.updateWindowsInView(windowsInView.map { it.id })
-        val positionedWindows = view.layout.retile(windowsInView, space)
-        return createPositionCommands(allWindows, positionedWindows)
+    private fun assignWindowsToLayoutSpaces(windows: Windows, monitors: List<Monitor>): Map<LayoutSpace, Windows> {
+        val defaultSpace = monitors.find { it.isPrimary }?.layoutSpace ?: monitors.first().layoutSpace
+        val spaces = monitors.map { it.layoutSpace }
+        return windows
+            .map { window: Window ->
+                val space = spaces.find { it.containsWindowCenter(window) } ?: defaultSpace
+                space to window
+            }
+            .groupBy({ it.first }, { it.second })
     }
 
-    private fun createPositionCommands(allWindows: Windows, positionedWindows: Windows): List<TilerCommand> {
-        val positionedWindowsById = positionedWindows.associateBy { it.id }
+    private fun LayoutSpace.containsWindowCenter(window: Window) = contains(window.position.centerX(), window.position.centerY())
+    private fun WindowPosition.centerX() = (x + width) / 2
+    private fun WindowPosition.centerY() = (y + height) / 2
+
+    private fun retile(view: View, windows: Windows, space: LayoutSpace): List<TilerCommand> {
+        val windowsInView = view.filterWindowsInView(windows)
+//        view.updateWindowsInView(windowsInView.map { it.id })
+        val movedWindows = view.layout.retile(windowsInView, space)
+        return setPositionOnlyWhenWindowMoved(windows, movedWindows)
+    }
+
+    private fun setPositionOnlyWhenWindowMoved(windows: Windows, movedWindows: Windows): List<TilerCommand> {
+        val positionedWindowsById = movedWindows.associateBy { it.id }
         val commands = mutableListOf<TilerCommand>()
-        allWindows.forEach {
+        windows.forEach {
             val positionedWindow = positionedWindowsById[it.id]
             if (positionedWindow != null && it.position != positionedWindow.position) {
                 commands.add(SetWindowPosition(it.id, positionedWindow.position))
