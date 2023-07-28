@@ -16,8 +16,7 @@ import java.awt.Toolkit
 import java.awt.TrayIcon
 import java.util.logging.Logger
 
-// TODO ignore admin windows (https://stackoverflow.com/a/24144277)
-// TODO hotkey to quickly activate/deactivate tiling
+// TODO ignore admin windows https://github.com/marad/tillr/issues/1 (https://stackoverflow.com/a/24144277)
 // TODO allow for external configuration
 // TODO GH Actions CI/CD
 // TODO installation script
@@ -45,11 +44,13 @@ import java.util.logging.Logger
 fun main() {
     val filteringRules = FilteringRules()
 
-    filteringRules.addAll(listOf(
-        Rule.manageIf { it.windowName in listOf("WhatsApp", "Messenger") },
-        Rule.manageIf { it.windowName == "Microsoft To Do" && it.className == "ApplicationFrameWindow" },
-        Rule.ignoreIf { it.className == "ApplicationFrameTitleBarWindow" },
-    ))
+    filteringRules.addAll(
+        listOf(
+            Rule.manageIf { it.windowName in listOf("WhatsApp", "Messenger") },
+            Rule.manageIf { it.windowName == "Microsoft To Do" && it.className == "ApplicationFrameWindow" },
+            Rule.ignoreIf { it.className == "ApplicationFrameTitleBarWindow" },
+        )
+    )
 
     val twoColumnLayout = TwoColumnLayout(0.55f)
     val layout = GapLayoutDecorator(20, twoColumnLayout)
@@ -101,18 +102,34 @@ fun createTrayIcon(os: OsFacade, tiler: TilerFacade): TrayIcon {
 
 private fun configureHotkeys(tiler: TilerFacade, layout: TwoColumnLayout, os: OsFacade) {
     // desktop switching keys
-    (0..8).forEach { viewId ->
-        os.registerHotkey("A-${viewId + 1}") {
+    fun registerHotkeyToView(switchViewKey: String, viewId: Int) {
+        os.registerHotkey("S-A-C-$switchViewKey") {
             os.execute(tiler.switchToView(viewId))
         }
-
-        os.registerHotkey("S-A-${viewId + 1}") {
+        os.registerHotkey("S-A-$switchViewKey") {
             os.execute(tiler.moveWindow(os.activeWindow(), viewId))
             os.execute(tiler.switchToView(viewId))
         }
     }
 
-    os.registerHotkey("A-E") {
+    registerHotkeyToView("U", 0)
+    registerHotkeyToView("I", 1)
+    registerHotkeyToView("O", 2)
+    registerHotkeyToView("P", 3)
+
+//    (0..8).forEach { viewId ->
+//        os.registerHotkey("$meh-${viewId + 1}") {
+//            os.execute(tiler.switchToView(viewId))
+//        }
+//
+//        os.registerHotkey("S-A-${viewId + 1}") {
+//            os.execute(tiler.moveWindow(os.activeWindow(), viewId))
+//            os.execute(tiler.switchToView(viewId))
+//        }
+//    }
+
+    val meh = "S-A-C"
+    os.registerHotkey("$meh-E") {
         os.execute(tiler.switchToPreviousView())
     }
 
@@ -123,7 +140,7 @@ private fun configureHotkeys(tiler: TilerFacade, layout: TwoColumnLayout, os: Os
         "J" to ::windowDown,
         "K" to ::windowUp
     ).forEach { (key, selectWindow) ->
-        os.registerHotkey("A-$key") {
+        os.registerHotkey("$meh-$key") {
             val visibleWindows = os.listWindows().filterNot { it.isMinimized }
             selectWindow(os.activeWindow(), visibleWindows)
                 ?.let { os.setActiveWindow(it.id) }

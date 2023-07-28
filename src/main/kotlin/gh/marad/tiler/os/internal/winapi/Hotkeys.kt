@@ -39,8 +39,6 @@ class Hotkeys : HotkeyListener {
             System.exit(1)
         }
         val it = JIntellitype.getInstance()
-        it.registerHotKey(1, JIntellitype.MOD_ALT, '1'.code)
-
         it.addHotKeyListener(this)
     }
 
