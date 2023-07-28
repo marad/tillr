@@ -1,12 +1,12 @@
 package gr.marad.tiler
 
 import gh.marad.tiler.common.filteringrules.FilteringRules
-import gh.marad.tiler.common.layout.OverlappingCascadeLayout
 import gh.marad.tiler.common.layout.LayoutSpace
 import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.common.*
 import gh.marad.tiler.os.WindowEventHandler
 import gh.marad.tiler.app.internal.TilerWindowEventHandler
+import gh.marad.tiler.config.ConfigFacade
 import gh.marad.tiler.tiler.TilerFacade
 import gr.marad.tiler.core.TestWindowId
 import gr.marad.tiler.core.testIdGen
@@ -90,7 +90,8 @@ val os = object : OsFacade {
     }
 
 }
-val tiler = TilerFacade.createTiler(OverlappingCascadeLayout(20), filteringRules, os)
+val config = ConfigFacade.createConfig()
+val tiler = TilerFacade.createTiler(config, filteringRules, os)
 val eventHandler = TilerWindowEventHandler(tiler, filteringRules, os)
 
 val xGen2 = Arb.int(0, width -10)
@@ -112,7 +113,10 @@ var desktopWindows = mutableListOf<WindowInfo>()
 
 fun MutableList<WindowInfo>.toDesktopState() = DesktopState(
     windows = this.map { it.window },
-    layoutSpace = LayoutSpace(0, 0, width, height)
+    monitors = listOf(Monitor(
+        LayoutSpace(0, 0, width, height),
+        isPrimary = true
+    ) )
 )
 
 val colors = mutableMapOf<String, Paint>()

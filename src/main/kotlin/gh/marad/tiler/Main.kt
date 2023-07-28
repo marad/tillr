@@ -2,8 +2,6 @@ package gh.marad.tiler
 
 import gh.marad.tiler.actions.ActionsFacade
 import gh.marad.tiler.app.AppFacade
-import gh.marad.tiler.common.filteringrules.FilteringRules
-import gh.marad.tiler.common.filteringrules.Rule
 import gh.marad.tiler.config.ConfigFacade
 import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.tiler.TilerFacade
@@ -16,6 +14,7 @@ import gh.marad.tiler.tiler.TilerFacade
 // TODO window showing registered hotkeys
 // TODO status toolbar showing current desktop
 // TODO [maybe] widgets for status toolbar
+// TODO default view assignments for windows (ie. WhatsApp -> view 1)
 
 
 /**
@@ -36,7 +35,7 @@ import gh.marad.tiler.tiler.TilerFacade
 fun main() {
     val config = ConfigFacade.createConfig()
     val os = OsFacade.createWindowsFacade()
-    val filteringRules = FilteringRules().also { it.addAll(config.getRules()) }
+    val filteringRules = config.getFilteringRules()
     val tiler = TilerFacade.createTiler(config, filteringRules, os)
     val actions = ActionsFacade.createActions()
     val app = AppFacade.createWindowsApp(config, os, tiler, actions)

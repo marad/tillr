@@ -18,6 +18,7 @@ dependencies {
     implementation("net.java.dev.jna:jna-platform:5.13.0")
     implementation("org.greenrobot:eventbus-java:3.3.1")
     implementation("com.melloware:jintellitype:1.4.1")
+    implementation("org.yaml:snakeyaml:1.27")
 
     implementation("org.slf4j:slf4j-api:2.0.7")
     implementation("org.slf4j:slf4j-simple:2.0.7")

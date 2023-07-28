@@ -1,0 +1,67 @@
+rules:
+  - title: "WhatsApp"
+    should: manage
+  - title: "Messenger"
+    should: manage
+  - title: "Microsoft To Do"
+    class: "ApplicationFrameWindow"
+    should: manage
+  - class: "ApplicationFrameTitleBarWindow"
+    should: ignore
+
+layout:
+  name: TwoColumnLayout
+  ratio: 0.55f
+  gap: 20
+
+hotkeys:
+  # Switch view
+  - key: "S-A-C-U"
+    action: SwitchView
+    value: 0
+  - key: "S-A-C-I"
+    action: SwitchView
+    value: 1
+  - key: "S-A-C-O"
+    action: SwitchView
+    value: 2
+  - key: "S-A-C-P"
+    action: SwitchView
+    value: 3
+
+  # Move window to view
+  - key: "S-A-U"
+    action: MoveActiveWindowToView
+    value: 0
+  - key: "S-A-I"
+    action: MoveActiveWindowToView
+    value: 1
+  - key: "S-A-O"
+    action: MoveActiveWindowToView
+    value: 2
+  - key: "S-A-P"
+    action: MoveActiveWindowToView
+    value: 3
+
+  # Switch to previous view
+  - key: "S-A-C-E"
+    action: SwitchToPreviousView
+    
+  # Window navigation
+  - key: "S-A-C-L"
+    action: MoveWindowRight
+  - key: "S-A-C-H"
+    action: MoveWindowLeft
+  - key: "S-A-C-J"
+    action: MoveWindowDown
+  - key: "S-A-C-K"
+    action: MoveWindowUp
+
+  # Layout
+  - key: "S-A-L"
+    action: LayoutIncrease
+    value: 0.03f
+  - key: "S-A-H"
+    action: LayoutDecrease
+    value: 0.03f
+
