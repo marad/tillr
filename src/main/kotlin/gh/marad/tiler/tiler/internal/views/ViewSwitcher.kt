@@ -21,10 +21,10 @@ class ViewSwitcher(private val viewManager: ViewManager, val getDesktopState: ()
     private fun activateView(viewId: Int): List<TilerCommand> {
         val desktopState = getDesktopState()
         val view = viewManager.changeCurrentView(viewId)
-        val showCommands = view.filterWindowsInView(desktopState.allWindows)
+        val showCommands = view.filterWindowsInView(desktopState.windows)
             .filter { it.isMinimized }
             .map { ShowWindow(it.id) }
-        val minimizeCommands = view.filterWindowsNotInView(desktopState.allWindows)
+        val minimizeCommands = view.filterWindowsNotInView(desktopState.windows)
             .filterNot { it.isMinimized }
             .map { MinimizeWindow(it.id) }
         val windowToActivate = view.windowToActivate()

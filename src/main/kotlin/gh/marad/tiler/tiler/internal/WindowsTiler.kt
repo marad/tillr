@@ -16,13 +16,13 @@ class WindowsTiler(
     private val filteringRules: FilteringRules,
     private val os: OsFacade,
 ): TilerFacade {
-    private val viewSwitcher = ViewSwitcher(viewManager, this::getDesktopState)
+    private val viewSwitcher = ViewSwitcher(viewManager, os::getDesktopState)
     override var enabled = true
 
     override fun initializeWithOpenWindows(): List<TilerCommand> {
         if (!enabled) return emptyList()
         viewManager.changeCurrentView(0)
-        getDesktopState().windowsToManage.forEach {
+        os.getDesktopState().getManagableWindows(filteringRules).forEach {
             if (!it.isPopup && !it.isMinimized) {
                 viewManager.currentView().addWindow(it.id)
             }
@@ -64,11 +64,9 @@ class WindowsTiler(
     override fun retile(): List<TilerCommand> {
         if (!enabled) return emptyList()
         val view = viewManager.currentView()
-        val desktopState = getDesktopState()
-        return retile(view, desktopState.windowsToManage, desktopState.layoutSpace)
+        val desktopState = os.getDesktopState()
+        return retile(view, desktopState.getManagableWindows(filteringRules), desktopState.layoutSpace)
     }
-
-    private fun getDesktopState(): DesktopState = os.getDesktopState(filteringRules)
 
     private fun retile(view: View, allWindows: Windows, space: LayoutSpace): List<TilerCommand> {
         allWindows.filterNot { it.isMinimized }

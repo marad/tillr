@@ -3,8 +3,6 @@ package gr.marad.tiler
 import gh.marad.tiler.common.filteringrules.FilteringRules
 import gh.marad.tiler.common.layout.OverlappingCascadeLayout
 import gh.marad.tiler.common.layout.LayoutSpace
-import gh.marad.tiler.tiler.internal.views.ViewManager
-import gh.marad.tiler.tiler.internal.views.ViewSwitcher
 import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.common.*
 import gh.marad.tiler.os.WindowEventHandler
@@ -29,7 +27,7 @@ var width = 640
 var height = 480
 val filteringRules = FilteringRules()
 val os = object : OsFacade {
-    override fun getDesktopState(filteringRules: FilteringRules): DesktopState {
+    override fun getDesktopState(): DesktopState {
         return desktopWindows.toDesktopState()
     }
 
@@ -113,8 +111,7 @@ data class WindowInfo(val window: Window, var minimized: Boolean)
 var desktopWindows = mutableListOf<WindowInfo>()
 
 fun MutableList<WindowInfo>.toDesktopState() = DesktopState(
-    allWindows = this.map { it.window },
-    windowsToManage = this.map { it.window },
+    windows = this.map { it.window },
     layoutSpace = LayoutSpace(0, 0, width, height)
 )
 

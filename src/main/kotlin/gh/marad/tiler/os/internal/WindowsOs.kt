@@ -3,24 +3,19 @@ package gh.marad.tiler.os.internal
 import com.sun.jna.platform.win32.User32
 import com.sun.jna.platform.win32.WinDef
 import gh.marad.tiler.common.Window
-import gh.marad.tiler.common.filteringrules.FilteringRules
 import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.os.internal.winapi.*
 import gh.marad.tiler.common.*
 import gh.marad.tiler.os.WindowEventHandler
 import gh.marad.tiler.os.internal.winapi.Window as OsWindow
 
-class WindowsFacade : OsFacade {
+class WindowsOs : OsFacade {
     private val hotkeys = Hotkeys()
 
-    // FIXME: nie jestem pewien czy klasa FilterRules powinna być tutaj użyta
-    //        wydaje mi się, że nie, ale to by wymagało usunięcia 'toManage' z DesktopState
-    //        co też wydaje się dobrym pomysłem
-    override fun getDesktopState(filteringRules: FilteringRules): DesktopState {
+    override fun getDesktopState(): DesktopState {
         val space = Monitors.primary().workArea.toLayoutSpace()
-        val allWindows = gh.marad.tiler.os.internal.winapi.listWindows().map { it.toTilerWindow() }
-        val toManage = allWindows.filter { filteringRules.shouldManage(it) }
-        return DesktopState(space, allWindows, toManage)
+        val windows = gh.marad.tiler.os.internal.winapi.listWindows().map { it.toTilerWindow() }
+        return DesktopState(space, windows)
     }
 
     override fun activeWindow(): Window =

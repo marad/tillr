@@ -1,14 +1,13 @@
 package gh.marad.tiler.os
 
-import gh.marad.tiler.common.filteringrules.FilteringRules
 import gh.marad.tiler.common.DesktopState
 import gh.marad.tiler.common.TilerCommand
 import gh.marad.tiler.common.Window
 import gh.marad.tiler.common.WindowId
-import gh.marad.tiler.os.internal.WindowsFacade
+import gh.marad.tiler.os.internal.WindowsOs
 
 interface OsFacade {
-    fun getDesktopState(filteringRules: FilteringRules): DesktopState
+    fun getDesktopState(): DesktopState
     fun activeWindow(): Window
     fun setActiveWindow(windowId: WindowId)
     fun listWindows(): List<Window>
@@ -20,6 +19,6 @@ interface OsFacade {
     fun windowDebugInfo(window: Window): String
 
     companion object {
-        fun create(): OsFacade = WindowsFacade()
+        fun create(): OsFacade = WindowsOs()
     }
 }
