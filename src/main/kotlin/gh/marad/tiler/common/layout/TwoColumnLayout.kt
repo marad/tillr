@@ -15,11 +15,11 @@ class TwoColumnLayout(private var ratio: Float = 0.5f) : Layout {
         height = space.height
     )
 
-    fun increaseRatio(value: Float) {
+    override fun increase(value: Float) {
         ratio = (ratio + value).coerceIn(0.1f, 0.9f)
     }
 
-    fun decreaseRatio(value: Float) {
+    override fun decrease(value: Float) {
         ratio = (ratio - value).coerceIn(0.1f, 0.9f)
     }
 

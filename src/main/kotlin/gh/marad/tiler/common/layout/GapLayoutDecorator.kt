@@ -9,6 +9,14 @@ class GapLayoutDecorator(private val gapSize: Int,
         return addGap(wrappedLayout.retile(windows, space), gapSize)
     }
 
+    override fun increase(value: Float) {
+        wrappedLayout.increase(value)
+    }
+
+    override fun decrease(value: Float) {
+        wrappedLayout.decrease(value)
+    }
+
     companion object {
         fun addGap(windows: Windows, gap: Int): Windows {
             var minX = Int.MAX_VALUE

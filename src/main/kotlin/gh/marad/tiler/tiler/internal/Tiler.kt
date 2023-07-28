@@ -3,6 +3,7 @@ package gh.marad.tiler.tiler.internal
 import gh.marad.tiler.common.*
 import gh.marad.tiler.common.Window
 import gh.marad.tiler.common.filteringrules.FilteringRules
+import gh.marad.tiler.common.layout.Layout
 import gh.marad.tiler.tiler.internal.views.ViewManager
 import gh.marad.tiler.tiler.internal.views.ViewSwitcher
 import gh.marad.tiler.common.layout.LayoutSpace
@@ -69,6 +70,10 @@ class Tiler(
             .filterNot { it.isMinimized }
         val assignedWindows = assignWindowsToLayoutSpaces(windows, desktopState.monitors)
         return assignedWindows.flatMap { retile(view, it.value, it.key) }
+    }
+
+    override fun currentViewLayout(): Layout {
+        return viewManager.currentView().layout
     }
 
     private fun assignWindowsToLayoutSpaces(windows: Windows, monitors: List<Monitor>): Map<LayoutSpace, Windows> {

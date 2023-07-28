@@ -1,14 +1,10 @@
 package gh.marad.tiler
 
+import gh.marad.tiler.actions.ActionsFacade
 import gh.marad.tiler.app.AppFacade
 import gh.marad.tiler.common.filteringrules.FilteringRules
 import gh.marad.tiler.common.filteringrules.Rule
-import gh.marad.tiler.common.layout.GapLayoutDecorator
-import gh.marad.tiler.common.layout.TwoColumnLayout
-import gh.marad.tiler.common.navigation.windowDown
-import gh.marad.tiler.common.navigation.windowLeft
-import gh.marad.tiler.common.navigation.windowRight
-import gh.marad.tiler.common.navigation.windowUp
+import gh.marad.tiler.config.ConfigFacade
 import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.tiler.TilerFacade
 import java.awt.SystemTray
@@ -52,16 +48,15 @@ fun main() {
         )
     )
 
-    val twoColumnLayout = TwoColumnLayout(0.55f)
-    val layout = GapLayoutDecorator(20, twoColumnLayout)
 
+    val config = ConfigFacade.createConfig()
     val os = OsFacade.createWindowsFacade()
-    val tiler = TilerFacade.createTiler(layout, filteringRules, os)
-    val app = AppFacade.createWindowsApp(os, tiler)
+    val tiler = TilerFacade.createTiler(config, filteringRules, os)
+    val actions = ActionsFacade.createActions()
+    val app = AppFacade.createWindowsApp(config, os, tiler, actions)
 
 
     @Suppress("UNUSED_VARIABLE") val trayIcon: TrayIcon = createTrayIcon(os, tiler)
-    configureHotkeys(tiler, twoColumnLayout, os)
 
     app.start(filteringRules)
 }
@@ -98,62 +93,4 @@ fun createTrayIcon(os: OsFacade, tiler: TilerFacade): TrayIcon {
 
     SystemTray.getSystemTray().add(trayIcon)
     return trayIcon
-}
-
-private fun configureHotkeys(tiler: TilerFacade, layout: TwoColumnLayout, os: OsFacade) {
-    // desktop switching keys
-    fun registerHotkeyToView(switchViewKey: String, viewId: Int) {
-        os.registerHotkey("S-A-C-$switchViewKey") {
-            os.execute(tiler.switchToView(viewId))
-        }
-        os.registerHotkey("S-A-$switchViewKey") {
-            os.execute(tiler.moveWindow(os.activeWindow(), viewId))
-            os.execute(tiler.switchToView(viewId))
-        }
-    }
-
-    registerHotkeyToView("U", 0)
-    registerHotkeyToView("I", 1)
-    registerHotkeyToView("O", 2)
-    registerHotkeyToView("P", 3)
-
-//    (0..8).forEach { viewId ->
-//        os.registerHotkey("$meh-${viewId + 1}") {
-//            os.execute(tiler.switchToView(viewId))
-//        }
-//
-//        os.registerHotkey("S-A-${viewId + 1}") {
-//            os.execute(tiler.moveWindow(os.activeWindow(), viewId))
-//            os.execute(tiler.switchToView(viewId))
-//        }
-//    }
-
-    val meh = "S-A-C"
-    os.registerHotkey("$meh-E") {
-        os.execute(tiler.switchToPreviousView())
-    }
-
-    // window navigation keys
-    mapOf(
-        "L" to ::windowRight,
-        "H" to ::windowLeft,
-        "J" to ::windowDown,
-        "K" to ::windowUp
-    ).forEach { (key, selectWindow) ->
-        os.registerHotkey("$meh-$key") {
-            val visibleWindows = os.listWindows().filterNot { it.isMinimized }
-            selectWindow(os.activeWindow(), visibleWindows)
-                ?.let { os.setActiveWindow(it.id) }
-        }
-    }
-
-    os.registerHotkey("S-A-L") {
-        layout.increaseRatio(0.03f)
-        os.execute(tiler.retile())
-    }
-
-    os.registerHotkey("S-A-H") {
-        layout.decreaseRatio(0.03f)
-        os.execute(tiler.retile())
-    }
 }
