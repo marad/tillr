@@ -34,22 +34,11 @@ import gh.marad.tiler.tiler.TilerFacade
  */
 
 fun main() {
-    val filteringRules = FilteringRules()
-
-    filteringRules.addAll(
-        listOf(
-            Rule.manageIf { it.windowName in listOf("WhatsApp", "Messenger") },
-            Rule.manageIf { it.windowName == "Microsoft To Do" && it.className == "ApplicationFrameWindow" },
-            Rule.ignoreIf { it.className == "ApplicationFrameTitleBarWindow" },
-        )
-    )
-
-
     val config = ConfigFacade.createConfig()
     val os = OsFacade.createWindowsFacade()
+    val filteringRules = FilteringRules().also { it.addAll(config.getRules()) }
     val tiler = TilerFacade.createTiler(config, filteringRules, os)
     val actions = ActionsFacade.createActions()
     val app = AppFacade.createWindowsApp(config, os, tiler, actions)
-
     app.start(filteringRules)
 }

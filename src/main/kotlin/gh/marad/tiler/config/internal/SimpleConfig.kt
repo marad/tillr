@@ -1,6 +1,7 @@
 package gh.marad.tiler.config.internal
 
 import gh.marad.tiler.actions.*
+import gh.marad.tiler.common.filteringrules.Rule
 import gh.marad.tiler.common.layout.GapLayoutDecorator
 import gh.marad.tiler.common.layout.Layout
 import gh.marad.tiler.common.layout.TwoColumnLayout
@@ -41,4 +42,11 @@ class SimpleConfig : ConfigFacade {
             Hotkey("S-A-H", LayoutDecrease(0.03f))
         )
     }
+
+    override fun getRules(): List<Rule> =
+        listOf(
+            Rule.manageIf { it.windowName in listOf("WhatsApp", "Messenger") },
+            Rule.manageIf { it.windowName == "Microsoft To Do" && it.className == "ApplicationFrameWindow" },
+            Rule.ignoreIf { it.className == "ApplicationFrameTitleBarWindow" },
+        )
 }
