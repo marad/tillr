@@ -19,6 +19,6 @@ interface OsFacade {
     fun windowDebugInfo(window: Window): String
 
     companion object {
-        fun create(): OsFacade = WindowsOs()
+        fun createWindowsFacade(): OsFacade = WindowsOs()
     }
 }

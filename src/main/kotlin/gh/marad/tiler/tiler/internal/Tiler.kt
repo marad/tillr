@@ -11,7 +11,7 @@ import gh.marad.tiler.tiler.TilerFacade
 import gh.marad.tiler.tiler.internal.views.View
 import gh.marad.tiler.common.Window as TilerWindow
 
-class WindowsTiler(
+class Tiler(
     private val viewManager: ViewManager,
     private val filteringRules: FilteringRules,
     private val os: OsFacade,

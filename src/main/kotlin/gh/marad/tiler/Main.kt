@@ -55,22 +55,18 @@ fun main() {
     val twoColumnLayout = TwoColumnLayout(0.55f)
     val layout = GapLayoutDecorator(20, twoColumnLayout)
 
-    val os = OsFacade.create()
-    val tiler = TilerFacade.windowsTiler(layout, filteringRules, os)
+    val os = OsFacade.createWindowsFacade()
+    val tiler = TilerFacade.createTiler(layout, filteringRules, os)
     val app = AppFacade.createWindowsApp(os, tiler)
 
-//    os.execute(windowsTiler.initializeWithOpenWindows())
 
     @Suppress("UNUSED_VARIABLE") val trayIcon: TrayIcon = createTrayIcon(os, tiler)
     configureHotkeys(tiler, twoColumnLayout, os)
 
-    // TODO event handler można zastąpić jakimś event bus'em
-//    val windowEventHandler = TilerWindowEventHandler(windowsTiler, filteringRules, os)
-//    os.startEventHandling(windowEventHandler)
     app.start(filteringRules)
 }
 
-fun createTrayIcon(os: OsFacade, windowsTiler: TilerFacade): TrayIcon {
+fun createTrayIcon(os: OsFacade, tiler: TilerFacade): TrayIcon {
     val icon = Toolkit.getDefaultToolkit().getImage(AppFacade::class.java.getResource("/icon.png"))
     val stopped = Toolkit.getDefaultToolkit().getImage(AppFacade::class.java.getResource("/stopped_icon.png"))
     val trayIcon = TrayIcon(icon, "Tiler")
@@ -84,11 +80,11 @@ fun createTrayIcon(os: OsFacade, windowsTiler: TilerFacade): TrayIcon {
             if (e?.button == java.awt.event.MouseEvent.BUTTON1) {
                 if (trayIcon.image == stopped) {
                     trayIcon.image = icon
-                    windowsTiler.enabled = true
-                    os.execute(windowsTiler.retile())
+                    tiler.enabled = true
+                    os.execute(tiler.retile())
                 } else {
                     trayIcon.image = stopped
-                    windowsTiler.enabled = false
+                    tiler.enabled = false
                 }
             }
         }
@@ -104,21 +100,21 @@ fun createTrayIcon(os: OsFacade, windowsTiler: TilerFacade): TrayIcon {
     return trayIcon
 }
 
-private fun configureHotkeys(windowsTiler: TilerFacade, layout: TwoColumnLayout, os: OsFacade) {
+private fun configureHotkeys(tiler: TilerFacade, layout: TwoColumnLayout, os: OsFacade) {
     // desktop switching keys
     (0..8).forEach { viewId ->
         os.registerHotkey("A-${viewId + 1}") {
-            os.execute(windowsTiler.switchToView(viewId))
+            os.execute(tiler.switchToView(viewId))
         }
 
         os.registerHotkey("S-A-${viewId + 1}") {
-            os.execute(windowsTiler.moveWindow(os.activeWindow(), viewId))
-            os.execute(windowsTiler.switchToView(viewId))
+            os.execute(tiler.moveWindow(os.activeWindow(), viewId))
+            os.execute(tiler.switchToView(viewId))
         }
     }
 
     os.registerHotkey("A-E") {
-        os.execute(windowsTiler.switchToPreviousView())
+        os.execute(tiler.switchToPreviousView())
     }
 
     // window navigation keys
@@ -137,11 +133,11 @@ private fun configureHotkeys(windowsTiler: TilerFacade, layout: TwoColumnLayout,
 
     os.registerHotkey("S-A-L") {
         layout.increaseRatio(0.05f)
-        os.execute(windowsTiler.retile())
+        os.execute(tiler.retile())
     }
 
     os.registerHotkey("S-A-H") {
         layout.decreaseRatio(0.05f)
-        os.execute(windowsTiler.retile())
+        os.execute(tiler.retile())
     }
 }

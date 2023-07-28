@@ -7,6 +7,6 @@ fun main() {
     val logger = Logger.getLogger("WindowInspector")
     logger.info("Activate target window!")
     Thread.sleep(1000)
-    val os = OsFacade.create()
+    val os = OsFacade.createWindowsFacade()
     logger.info(os.windowDebugInfo(os.activeWindow()))
 }

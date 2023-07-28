@@ -90,7 +90,7 @@ val os = object : OsFacade {
     }
 
 }
-val tiler = TilerFacade.windowsTiler(OverlappingCascadeLayout(20), filteringRules, os)
+val tiler = TilerFacade.createTiler(OverlappingCascadeLayout(20), filteringRules, os)
 val eventHandler = TilerWindowEventHandler(tiler, filteringRules, os)
 
 val xGen2 = Arb.int(0, width -10)
