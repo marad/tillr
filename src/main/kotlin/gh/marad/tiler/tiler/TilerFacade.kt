@@ -23,7 +23,7 @@ interface TilerFacade {
 
     companion object {
         fun createTiler(config: ConfigFacade, os: OsFacade): TilerFacade {
-            return Tiler(ViewManager(config::createLayout), config.getFilteringRules(), os)
+            return Tiler(ViewManager(config::createLayout), config.getFilteringRules(), config.getAssignments(), os)
         }
     }
 }

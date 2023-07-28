@@ -2,6 +2,7 @@ package gh.marad.tiler.config.internal
 
 import gh.marad.tiler.actions.*
 import gh.marad.tiler.common.Window
+import gh.marad.tiler.common.assignments.WindowAssignments
 import gh.marad.tiler.common.filteringrules.FilteringRules
 import gh.marad.tiler.common.filteringrules.Rule
 import gh.marad.tiler.common.layout.GapLayoutDecorator
@@ -42,6 +43,10 @@ class YamlConfig : ConfigFacade {
 
     override fun getFilteringRules(): FilteringRules {
         return filteringRules
+    }
+
+    override fun getAssignments(): WindowAssignments {
+        TODO("Not yet implemented")
     }
 
     private fun readLayout(data: Map<String, Any>) {

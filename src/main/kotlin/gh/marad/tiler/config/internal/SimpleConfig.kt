@@ -1,6 +1,8 @@
 package gh.marad.tiler.config.internal
 
 import gh.marad.tiler.actions.*
+import gh.marad.tiler.common.assignments.Assign
+import gh.marad.tiler.common.assignments.WindowAssignments
 import gh.marad.tiler.common.filteringrules.FilteringRules
 import gh.marad.tiler.common.filteringrules.Rule
 import gh.marad.tiler.common.layout.GapLayoutDecorator
@@ -18,6 +20,11 @@ class SimpleConfig : ConfigFacade {
                 Rule.ignoreIf { it.className == "ApplicationFrameTitleBarWindow" },
             )
         ) }
+
+    private val assignments = WindowAssignments().also {
+        it.add(Assign.viewToWindow(3) { it.windowName == "WhatsApp" })
+        it.add(Assign.viewToWindow(3) { it.windowName == "Messenger" })
+    }
 
     override fun reload() { }
 
@@ -56,4 +63,6 @@ class SimpleConfig : ConfigFacade {
     }
 
     override fun getFilteringRules(): FilteringRules = filteringRules
+
+    override fun getAssignments(): WindowAssignments = assignments
 }

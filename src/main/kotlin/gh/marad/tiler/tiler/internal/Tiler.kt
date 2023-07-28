@@ -2,6 +2,7 @@ package gh.marad.tiler.tiler.internal
 
 import gh.marad.tiler.common.*
 import gh.marad.tiler.common.Window
+import gh.marad.tiler.common.assignments.WindowAssignments
 import gh.marad.tiler.common.filteringrules.FilteringRules
 import gh.marad.tiler.common.layout.Layout
 import gh.marad.tiler.tiler.internal.views.ViewManager
@@ -15,6 +16,7 @@ import gh.marad.tiler.common.Window as TilerWindow
 class Tiler(
     private val viewManager: ViewManager,
     private val filteringRules: FilteringRules,
+    private val assignments: WindowAssignments,
     private val os: OsFacade,
 ): TilerFacade {
     private val viewSwitcher = ViewSwitcher(viewManager, filteringRules, os::getDesktopState)
@@ -26,6 +28,10 @@ class Tiler(
         os.getDesktopState().getManagableWindows(filteringRules).forEach {
             if (!it.isPopup && !it.isMinimized) {
                 viewManager.currentView().addWindow(it.id)
+            }
+
+            assignments.getAssignmentForWindow(it)?.let { assignment ->
+                viewManager.getView(assignment.viewId).addWindow(it.id)
             }
         }
         return retile()
@@ -42,6 +48,7 @@ class Tiler(
     }
 
     override fun addWindow(window: Window): List<TilerCommand> {
+        // TODO appearing windows should be assigned, but restored windows should not
         viewManager.currentView().addWindow(window.id)
         return retile()
     }
