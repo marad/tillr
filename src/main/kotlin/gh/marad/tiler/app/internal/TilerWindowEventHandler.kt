@@ -41,6 +41,8 @@ class TilerWindowEventHandler(
         val foundWindow = os.windowsUnderCursor().lastOrNull()
         if (foundWindow != null && foundWindow.id != window.id) {
             os.execute(tiler.swapWindows(window, foundWindow))
+        } else {
+            os.execute(tiler.retile())
         }
     }
 
