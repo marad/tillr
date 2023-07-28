@@ -39,6 +39,10 @@ class WindowsOs : OsFacade {
         return hotkeys.register(shortcut, handler)
     }
 
+    override fun clearHotkeys() {
+        hotkeys.clear()
+    }
+
     override fun execute(command: TilerCommand) {
         when(command) {
             is SetWindowPosition -> {

@@ -9,6 +9,7 @@ import gh.marad.tiler.tiler.TilerFacade
 
 interface AppFacade {
     fun start(filteringRules: FilteringRules)
+    fun reloadConfig()
 
     companion object {
         fun createWindowsApp(config: ConfigFacade, os: OsFacade, tiling: TilerFacade, actions: ActionsFacade): AppFacade {

@@ -1,5 +1,6 @@
 package gh.marad.tiler.config.internal
 
+import gh.marad.tiler.actions.SwitchView
 import gh.marad.tiler.common.Window
 import gh.marad.tiler.common.WindowId
 import gh.marad.tiler.common.WindowPosition
@@ -38,6 +39,23 @@ class YamlConfigTest {
         rules.shouldManage(sampleWindow(title = "WhatsApp")).shouldBeTrue()
         rules.shouldManage(sampleWindow(title = "Microsoft To Do", className = "ApplicationFrameWindow")).shouldBeTrue()
         rules.shouldManage(sampleWindow(className = "ApplicationFrameTitleBarWindow")).shouldBeFalse()
+    }
+
+
+    @Test
+    fun `should load hotkeys from yaml`() {
+        val config = YamlConfig()
+        config.loadConfig { this::class.java.getResourceAsStream("/sampleConfig.yaml") }
+
+        val hotkeys = config.getHotkeys()
+
+        hotkeys.size shouldBe 15
+        hotkeys[0].should {
+            it.action.shouldBeTypeOf<SwitchView>().should {
+                it.viewId shouldBe 0
+            }
+            it.key shouldBe "S-A-C-U"
+        }
     }
 
     object TestWindowId : WindowId

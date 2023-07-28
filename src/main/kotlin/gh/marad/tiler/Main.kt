@@ -7,7 +7,6 @@ import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.tiler.TilerFacade
 
 // TODO ignore admin windows https://github.com/marad/tillr/issues/1 (https://stackoverflow.com/a/24144277)
-// TODO allow for external configuration
 // TODO GH Actions CI/CD
 // TODO installation script
 // TODO handle fullscreen windows

@@ -42,6 +42,13 @@ class Hotkeys : HotkeyListener {
         it.addHotKeyListener(this)
     }
 
+    fun clear() {
+        repeat(handlers.size) {
+            JIntellitype.getInstance().unregisterHotKey(it)
+        }
+        handlers.clear()
+    }
+
     fun register(shortcutText: String, handler: Handler): Boolean {
         val id = handlers.size + 1
         val shortcut = Shortcut.parse(shortcutText)

@@ -13,6 +13,7 @@ interface OsFacade {
     fun listWindows(): List<Window>
     fun windowsUnderCursor(): List<Window>
     fun registerHotkey(shortcut: String, handler: () -> Unit): Boolean
+    fun clearHotkeys()
     fun execute(command: TilerCommand)
     fun execute(commands: List<TilerCommand>)
     fun startEventHandling(handler: WindowEventHandler)

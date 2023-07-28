@@ -1,6 +1,7 @@
 package gh.marad.tiler.app.internal
 
 import gh.marad.tiler.actions.*
+import gh.marad.tiler.app.AppFacade
 import gh.marad.tiler.common.Window
 import gh.marad.tiler.common.Windows
 import gh.marad.tiler.common.navigation.windowDown
@@ -11,8 +12,9 @@ import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.tiler.TilerFacade
 
 class ActionHandler(
+    private val app: AppFacade,
     private val os: OsFacade,
-    private val tiler: TilerFacade
+    private val tiler: TilerFacade,
 ) : ActionListener {
     override fun onAction(action: Action) {
         when (action) {
@@ -31,6 +33,7 @@ class ActionHandler(
             MoveWindowUp -> selectWindow(::windowUp)
             SwitchToPreviousView -> os.execute(tiler.switchToPreviousView())
             is SwitchView -> os.execute(tiler.switchToView(action.viewId))
+            ReloadConfig -> app.reloadConfig()
         }
     }
 

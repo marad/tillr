@@ -7,19 +7,32 @@ import gh.marad.tiler.config.ConfigFacade
 import gh.marad.tiler.config.Hotkey
 import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.tiler.TilerFacade
+import org.slf4j.LoggerFactory
 import java.awt.SystemTray
 import java.awt.Toolkit
 import java.awt.TrayIcon
-import java.util.logging.Logger
 
 class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, val actions: ActionsFacade) : AppFacade {
+    private val logger = LoggerFactory.getLogger(App::class.java)
+
     @Suppress("UNUSED_VARIABLE")
     override fun start(filteringRules: FilteringRules) {
         val trayIcon = createTrayIcon(os, tiler)
         setupHotkeys(config.getHotkeys())
-        actions.registerActionListener(ActionHandler(os, tiler))
+        actions.registerActionListener(ActionHandler(this, os, tiler))
         os.execute(tiler.initializeWithOpenWindows())
         os.startEventHandling(TilerWindowEventHandler(tiler, filteringRules, os))
+    }
+
+    override fun reloadConfig() {
+        logger.info("Reloading config...")
+        config.reload()
+        logger.info("Updating hotkeys...")
+        os.clearHotkeys()
+        setupHotkeys(config.getHotkeys())
+        logger.info("Hotkeys updated...")
+        os.execute(tiler.retile())
+        logger.info("Config reloaded!")
     }
 
     private fun setupHotkeys(hotkeys: List<Hotkey>) {
@@ -36,7 +49,7 @@ class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, va
         val trayIcon = TrayIcon(icon, "Tiler")
         trayIcon.isImageAutoSize = true
         trayIcon.addActionListener {
-            Logger.getLogger("createTrayIcon").info("Event: ${it.actionCommand}")
+            logger.info("Event: ${it.actionCommand}")
         }
 
         trayIcon.addMouseListener(object : java.awt.event.MouseAdapter() {
