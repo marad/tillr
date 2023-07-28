@@ -1,8 +1,9 @@
 package gh.marad.tiler.tiler.internal.views
 
 import gh.marad.tiler.common.*
+import gh.marad.tiler.common.filteringrules.FilteringRules
 
-class ViewSwitcher(private val viewManager: ViewManager, val getDesktopState: () -> DesktopState) {
+class ViewSwitcher(private val viewManager: ViewManager, private val filteringRules: FilteringRules, val getDesktopState: () -> DesktopState) {
     private var activeView: Int? = null
     private var previousView: Int? = null
 
@@ -24,7 +25,7 @@ class ViewSwitcher(private val viewManager: ViewManager, val getDesktopState: ()
         val showCommands = view.filterWindowsInView(desktopState.windows)
             .filter { it.isMinimized }
             .map { ShowWindow(it.id) }
-        val minimizeCommands = view.filterWindowsNotInView(desktopState.windows)
+        val minimizeCommands = view.filterWindowsNotInView(desktopState.getManagableWindows(filteringRules))
             .filterNot { it.isMinimized }
             .map { MinimizeWindow(it.id) }
         val windowToActivate = view.windowToActivate()

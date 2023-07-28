@@ -16,7 +16,7 @@ class WindowsTiler(
     private val filteringRules: FilteringRules,
     private val os: OsFacade,
 ): TilerFacade {
-    private val viewSwitcher = ViewSwitcher(viewManager, os::getDesktopState)
+    private val viewSwitcher = ViewSwitcher(viewManager, filteringRules, os::getDesktopState)
     override var enabled = true
 
     override fun initializeWithOpenWindows(): List<TilerCommand> {
