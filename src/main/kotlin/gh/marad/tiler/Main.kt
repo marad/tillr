@@ -7,10 +7,6 @@ import gh.marad.tiler.common.filteringrules.Rule
 import gh.marad.tiler.config.ConfigFacade
 import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.tiler.TilerFacade
-import java.awt.SystemTray
-import java.awt.Toolkit
-import java.awt.TrayIcon
-import java.util.logging.Logger
 
 // TODO ignore admin windows https://github.com/marad/tillr/issues/1 (https://stackoverflow.com/a/24144277)
 // TODO allow for external configuration
@@ -55,42 +51,5 @@ fun main() {
     val actions = ActionsFacade.createActions()
     val app = AppFacade.createWindowsApp(config, os, tiler, actions)
 
-
-    @Suppress("UNUSED_VARIABLE") val trayIcon: TrayIcon = createTrayIcon(os, tiler)
-
     app.start(filteringRules)
-}
-
-fun createTrayIcon(os: OsFacade, tiler: TilerFacade): TrayIcon {
-    val icon = Toolkit.getDefaultToolkit().getImage(AppFacade::class.java.getResource("/icon.png"))
-    val stopped = Toolkit.getDefaultToolkit().getImage(AppFacade::class.java.getResource("/stopped_icon.png"))
-    val trayIcon = TrayIcon(icon, "Tiler")
-    trayIcon.isImageAutoSize = true
-    trayIcon.addActionListener {
-        Logger.getLogger("createTrayIcon").info("Event: ${it.actionCommand}")
-    }
-
-    trayIcon.addMouseListener(object : java.awt.event.MouseAdapter() {
-        override fun mouseClicked(e: java.awt.event.MouseEvent?) {
-            if (e?.button == java.awt.event.MouseEvent.BUTTON1) {
-                if (trayIcon.image == stopped) {
-                    trayIcon.image = icon
-                    tiler.enabled = true
-                    os.execute(tiler.retile())
-                } else {
-                    trayIcon.image = stopped
-                    tiler.enabled = false
-                }
-            }
-        }
-    })
-
-    val popupMenu = java.awt.PopupMenu()
-    popupMenu.add(java.awt.MenuItem("Exit")).addActionListener {
-        System.exit(0)
-    }
-    trayIcon.popupMenu = popupMenu
-
-    SystemTray.getSystemTray().add(trayIcon)
-    return trayIcon
 }
