@@ -132,12 +132,12 @@ private fun configureHotkeys(tiler: TilerFacade, layout: TwoColumnLayout, os: Os
     }
 
     os.registerHotkey("S-A-L") {
-        layout.increaseRatio(0.05f)
+        layout.increaseRatio(0.03f)
         os.execute(tiler.retile())
     }
 
     os.registerHotkey("S-A-H") {
-        layout.decreaseRatio(0.05f)
+        layout.decreaseRatio(0.03f)
         os.execute(tiler.retile())
     }
 }
