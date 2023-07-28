@@ -34,9 +34,8 @@ import gh.marad.tiler.tiler.TilerFacade
 fun main() {
     val config = ConfigFacade.createConfig()
     val os = OsFacade.createWindowsFacade()
-    val filteringRules = config.getFilteringRules()
-    val tiler = TilerFacade.createTiler(config, filteringRules, os)
+    val tiler = TilerFacade.createTiler(config, os)
     val actions = ActionsFacade.createActions()
     val app = AppFacade.createWindowsApp(config, os, tiler, actions)
-    app.start(filteringRules)
+    app.start()
 }

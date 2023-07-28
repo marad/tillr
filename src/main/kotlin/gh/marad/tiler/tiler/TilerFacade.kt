@@ -2,7 +2,6 @@ package gh.marad.tiler.tiler
 
 import gh.marad.tiler.common.TilerCommand
 import gh.marad.tiler.common.Window
-import gh.marad.tiler.common.filteringrules.FilteringRules
 import gh.marad.tiler.common.layout.Layout
 import gh.marad.tiler.config.ConfigFacade
 import gh.marad.tiler.os.OsFacade
@@ -23,8 +22,8 @@ interface TilerFacade {
     fun currentViewLayout(): Layout
 
     companion object {
-        fun createTiler(config: ConfigFacade, filteringRules: FilteringRules, os: OsFacade): TilerFacade {
-            return Tiler(ViewManager(config::createLayout), filteringRules, os)
+        fun createTiler(config: ConfigFacade, os: OsFacade): TilerFacade {
+            return Tiler(ViewManager(config::createLayout), config.getFilteringRules(), os)
         }
     }
 }

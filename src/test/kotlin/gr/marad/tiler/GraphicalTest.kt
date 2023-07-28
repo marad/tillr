@@ -51,6 +51,10 @@ val os = object : OsFacade {
         TODO("Not yet implemented")
     }
 
+    override fun clearHotkeys() {
+        TODO("Not yet implemented")
+    }
+
     override fun startEventHandling(handler: WindowEventHandler) {
         TODO("Not yet implemented")
     }
@@ -91,7 +95,7 @@ val os = object : OsFacade {
 
 }
 val config = ConfigFacade.createConfig()
-val tiler = TilerFacade.createTiler(config, filteringRules, os)
+val tiler = TilerFacade.createTiler(config, os)
 val eventHandler = TilerWindowEventHandler(tiler, filteringRules, os)
 
 val xGen2 = Arb.int(0, width -10)
