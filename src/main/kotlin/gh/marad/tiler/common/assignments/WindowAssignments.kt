@@ -5,6 +5,7 @@ import gh.marad.tiler.common.Window
 class WindowAssignments {
     private val assignments: MutableList<Assignment> = mutableListOf()
 
+    @Suppress("unused")
     fun clear() {
         assignments.clear()
     }

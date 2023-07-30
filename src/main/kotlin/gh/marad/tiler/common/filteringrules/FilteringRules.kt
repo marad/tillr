@@ -14,13 +14,11 @@ class FilteringRules {
         this.rules.addAll(rules)
     }
 
-    fun clear() {
+    fun clear(applyCoreRules: Boolean = true) {
         rules.clear()
-    }
-
-    fun reset() {
-        rules.clear()
-        rules.addAll(CoreRules)
+        if(applyCoreRules) {
+            rules.addAll(CoreRules)
+        }
     }
 
     fun shouldManage(window: Window): Boolean = rules.lastOrNull { it.matches(window) }?.shouldManage ?: true

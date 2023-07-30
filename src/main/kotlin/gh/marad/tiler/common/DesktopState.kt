@@ -7,7 +7,8 @@ data class DesktopState(
     val monitors: List<Monitor>,
     val windows: Windows,
 ) {
-    fun getManagableWindows(filteringRules: FilteringRules): Windows = windows.filter { filteringRules.shouldManage(it) }
+    fun getManagableWindows(filteringRules: FilteringRules): Windows =
+        windows.filter { filteringRules.shouldManage(it) }
 }
 
 data class Monitor(

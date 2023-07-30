@@ -82,7 +82,7 @@ class YamlConfig : ConfigFacade {
                 "ignore" -> Rule.ignoreIf(check)
                 else -> throw IllegalArgumentException("Unknown rule type: $title")
             }
-            filteringRules.reset()
+            filteringRules.clear()
             filteringRules.add(rule)
         }
 
