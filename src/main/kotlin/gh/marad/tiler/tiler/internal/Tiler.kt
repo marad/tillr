@@ -48,7 +48,11 @@ class Tiler(
     }
 
     override fun addWindow(window: Window): List<TilerCommand> {
-        // TODO appearing windows should be assigned, but restored windows should not
+        val wasNotAssignedBefore = !viewManager.isWindowAssigned(window.id)
+        val assignment = assignments.getAssignmentForWindow(window)
+        if (wasNotAssignedBefore && assignment != null) {
+            viewManager.addWindowToView(window.id, assignment.viewId)
+        }
         viewManager.currentView().addWindow(window.id)
         return retile()
     }

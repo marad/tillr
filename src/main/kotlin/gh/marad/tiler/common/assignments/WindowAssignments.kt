@@ -13,6 +13,10 @@ class WindowAssignments {
         assignments.add(assignment)
     }
 
+    fun addAll(assignments: List<Assignment>) {
+        this.assignments.addAll(assignments)
+    }
+
     fun getAssignmentForWindow(window: Window): Assignment? {
         return assignments.firstOrNull { it.matches(window) }
     }

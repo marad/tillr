@@ -21,9 +21,15 @@ class SimpleConfig : ConfigFacade {
             )
         ) }
 
-    private val assignments = WindowAssignments().also {
-        it.add(Assign.viewToWindow(3) { it.windowName == "WhatsApp" })
-        it.add(Assign.viewToWindow(3) { it.windowName == "Messenger" })
+    private val assignments = WindowAssignments().also { assignments ->
+        assignments.addAll(
+            listOf(
+                Assign.viewToWindow(1) { it.exeName == "chrome.exe" && !it.windowName.contains("Kalendarz Google") },
+                Assign.viewToWindow(2) { it.exeName == "idea64.exe" },
+                Assign.viewToWindow(3) { it.windowName == "WhatsApp" },
+                Assign.viewToWindow(3) { it.windowName == "Messenger" },
+            )
+        )
     }
 
     override fun reload() { }

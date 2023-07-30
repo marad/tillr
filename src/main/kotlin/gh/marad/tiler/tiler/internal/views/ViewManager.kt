@@ -19,6 +19,16 @@ class ViewManager(private val defaultLayout: () -> Layout) {
         return currentView()
     }
 
+    fun isWindowAssigned(windowId: WindowId): Boolean {
+        return _views.values.any {
+            it.hasWindow(windowId)
+        }
+    }
+
+    fun addWindowToView(windowId: WindowId, viewId: Int) {
+        getView(viewId).addWindow(windowId)
+    }
+
     fun moveWindow(windowId: WindowId, viewId: Int) {
         currentView().removeWindow(windowId)
         getView(viewId).addWindow(windowId)
