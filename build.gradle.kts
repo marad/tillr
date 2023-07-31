@@ -19,6 +19,7 @@ dependencies {
     implementation("org.greenrobot:eventbus-java:3.3.1")
     implementation("com.melloware:jintellitype:1.4.1")
     implementation("org.yaml:snakeyaml:2.0")
+    implementation("com.offbytwo:docopt:0.6.0.20150202")
 
     implementation("org.slf4j:slf4j-api:2.0.7")
     implementation("org.slf4j:slf4j-simple:2.0.7")
