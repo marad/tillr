@@ -13,6 +13,9 @@ layout:
   name: TwoColumnLayout
   ratio: 0.55f
   gap: 20
+  minSize:
+    width: 1500
+    height: 600
 
 hotkeys:
   # Switch view

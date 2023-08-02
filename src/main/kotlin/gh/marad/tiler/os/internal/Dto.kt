@@ -26,5 +26,6 @@ fun OsWindow.toTilerWindow() = TilerWindow(
     getPos().toPosition().removeInvisibleBorders(windowBorders(handle)),
     isMinimized(),
     isMaximized(),
-    isPopup()
+    isPopup(),
+    isActive()
 )

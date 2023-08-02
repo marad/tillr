@@ -7,6 +7,7 @@ import gh.marad.tiler.common.filteringrules.FilteringRules
 import gh.marad.tiler.common.filteringrules.Rule
 import gh.marad.tiler.common.layout.GapLayoutDecorator
 import gh.marad.tiler.common.layout.Layout
+import gh.marad.tiler.common.layout.MinWindowSizeLayoutDecorator
 import gh.marad.tiler.common.layout.TwoColumnLayout
 import gh.marad.tiler.config.ConfigException
 import gh.marad.tiler.config.ConfigFacade
@@ -63,13 +64,25 @@ class YamlConfig(configPath: String) : ConfigFacade {
         TODO("Not yet implemented")
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun readLayout(data: Map<String, Any>) {
         val name = data["name"].toString()
         val gap = data["gap"].toString().toInt()
         val ratio =  data["ratio"].toString().toFloat()
+        val minSize = data["minSize"] as Map<String, Any>
+
         layoutCreator = when (name) {
             "TwoColumnLayout" -> { {TwoColumnLayout(ratio)} }
             else -> throw IllegalArgumentException("Unknown layout name: $name")
+        }
+
+        if (minSize != null) {
+            val wrappedLayout = layoutCreator
+            layoutCreator = { MinWindowSizeLayoutDecorator(
+                minimumWidth = minSize["width"]?.toString()?.toInt() ?: 1,
+                minimumHeight = minSize["height"]?.toString()?.toInt()  ?: 1,
+                wrappedLayout = wrappedLayout()
+            ) }
         }
 
         if (gap != 0) {

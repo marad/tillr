@@ -63,6 +63,5 @@ data class Window(val handle: WinDef.HWND) {
         return Process(processId.value)
     }
 
-
-
+    fun isActive(): Boolean = handle == u32.GetForegroundWindow()
 }
