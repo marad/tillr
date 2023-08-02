@@ -1,11 +1,13 @@
 package gr.marad.tiler
 
-import gh.marad.tiler.core.*
-import gh.marad.tiler.core.filteringrules.FilteringRules
-import gh.marad.tiler.core.layout.OverlappingCascadeLayout
-import gh.marad.tiler.core.layout.LayoutSpace
-import gh.marad.tiler.core.views.ViewManager
-import gh.marad.tiler.core.views.ViewSwitcher
+import gh.marad.tiler.common.filteringrules.FilteringRules
+import gh.marad.tiler.common.layout.LayoutSpace
+import gh.marad.tiler.os.OsFacade
+import gh.marad.tiler.common.*
+import gh.marad.tiler.os.WindowEventHandler
+import gh.marad.tiler.app.internal.TilerWindowEventHandler
+import gh.marad.tiler.config.ConfigFacade
+import gh.marad.tiler.tiler.TilerFacade
 import gr.marad.tiler.core.TestWindowId
 import gr.marad.tiler.core.testIdGen
 import io.kotest.property.Arb
@@ -18,20 +20,83 @@ import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import kotlin.system.exitProcess
 
-//val typeface = Typeface.makeDefault()
 
 var mouseX = 0
 var mouseY = 0
 var width = 640
 var height = 480
 val filteringRules = FilteringRules()
-//val viewManager = ViewManager { TwoColumnLayout(LayoutSpace(0, 0, width, height)) }
-val viewManager = ViewManager { OverlappingCascadeLayout(20) }
-val viewSwitcher = ViewSwitcher(viewManager) { desktopWindows.toDesktopState() }
-val tiler = WindowsTiler(viewManager) { desktopWindows.toDesktopState() }
-val eventHandler = WindowEventHandler(viewManager, tiler, filteringRules) {
-    getWindowAt(mouseX, mouseY)?.let { listOf(it) } ?: emptyList()
+val os = object : OsFacade {
+    override fun getDesktopState(): DesktopState {
+        return desktopWindows.toDesktopState()
+    }
+
+    override fun activeWindow(): Window {
+        TODO("Not yet implemented")
+    }
+
+    override fun setActiveWindow(windowId: WindowId) {
+        TODO("Not yet implemented")
+    }
+
+    override fun listWindows(): List<Window> {
+        TODO("Not yet implemented")
+    }
+
+    override fun windowsUnderCursor(): List<Window> {
+        return getWindowAt(mouseX, mouseY)?.let { listOf(it) } ?: emptyList()
+    }
+
+    override fun registerHotkey(shortcut: String, handler: () -> Unit): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun clearHotkeys() {
+        TODO("Not yet implemented")
+    }
+
+    override fun startEventHandling(handler: WindowEventHandler) {
+        TODO("Not yet implemented")
+    }
+
+    override fun execute(command: TilerCommand) {
+        TODO("Not yet implemented")
+    }
+
+    override fun execute(commands: List<TilerCommand>) {
+        commands.forEach { cmd ->
+            when(cmd) {
+                is SetWindowPosition -> {
+                    desktopWindows.replaceAll {
+                        if (it.window.id == cmd.windowId) {
+                            it.copy(minimized = false, window = it.window.copy(position = cmd.position))
+                        } else {
+                            it
+                        }
+                    }
+                }
+                is MinimizeWindow -> {
+                    desktopWindows.replaceAll {
+                        if (it.window.id == cmd.windowId) {
+                            it.copy(minimized = true)
+                        } else { it }
+                    }
+                }
+
+                is ActivateWindow -> TODO()
+                is ShowWindow -> TODO()
+            }
+        }
+    }
+
+    override fun windowDebugInfo(window: Window): String {
+        TODO("Not yet implemented")
+    }
+
 }
+val config = ConfigFacade.createConfig()
+val tiler = TilerFacade.createTiler(config, os)
+val eventHandler = TilerWindowEventHandler(tiler, filteringRules, os)
 
 val xGen2 = Arb.int(0, width -10)
 val yGen2 = Arb.int(0, height -10)
@@ -51,9 +116,11 @@ data class WindowInfo(val window: Window, var minimized: Boolean)
 var desktopWindows = mutableListOf<WindowInfo>()
 
 fun MutableList<WindowInfo>.toDesktopState() = DesktopState(
-    allWindows = this.map { it.window },
-    windowsToManage = this.map { it.window },
-    layoutSpace = LayoutSpace(0, 0, width, height)
+    windows = this.map { it.window },
+    monitors = listOf(Monitor(
+        LayoutSpace(0, 0, width, height),
+        isPrimary = true
+    ) )
 )
 
 val colors = mutableMapOf<String, Paint>()
@@ -64,18 +131,16 @@ fun init(windowHandle: Long) {
         if (key == GLFW_KEY_A && action == GLFW_PRESS) {
             val windowID = testIdGen.next()
             val wnd = Window(TestWindowId(windowID), "Name", "class", "exe_path", posGen2.next(), isMinimized = false, isMaximized = false, isPopup = false)
-            colors.put(windowID, paintGen.next())
+            colors[windowID] = paintGen.next()
             desktopWindows.add(WindowInfo(wnd, false))
-            val cmds = eventHandler.windowAppeared(wnd)
-            applyCommands(cmds)
+             eventHandler.windowAppeared(wnd)
         }
 
         if (key == GLFW_KEY_D && action == GLFW_PRESS) {
             val windowAtCursor = getWindowAt(mouseX, mouseY) ?: desktopWindows.lastOrNull()?.window
             if (windowAtCursor != null) {
                 desktopWindows.removeIf { windowAtCursor== it.window }
-                val cmds = eventHandler.windowDisappeared(windowAtCursor)
-                applyCommands(cmds)
+                 eventHandler.windowDisappeared(windowAtCursor)
             }
         }
 
@@ -88,7 +153,6 @@ fun init(windowHandle: Long) {
                     } else { it }
                 }
                 eventHandler.windowMinimized(windowAtCursor)
-                    .also { applyCommands(it) }
             }
         }
 
@@ -101,15 +165,13 @@ fun init(windowHandle: Long) {
                     } else { it }
                 }
                 eventHandler.windowRestored(windowToRestore)
-                    .also(::applyCommands)
             }
         }
 
 
         if (key in GLFW_KEY_0..GLFW_KEY_9 && action == GLFW_PRESS) {
             val viewId = key - GLFW_KEY_0 - 1
-            val cmds = viewSwitcher.switchToView(viewId)
-            applyCommands(cmds)
+            tiler.switchToView(viewId)
         }
 
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
@@ -132,39 +194,12 @@ fun init(windowHandle: Long) {
 }
 
 fun getWindowAt(x: Int, y: Int): Window? {
-    return desktopWindows.filter {
+    return desktopWindows.singleOrNull {
         val pos = it.window.position
         !it.minimized &&
                 x >= pos.x && x <= pos.x + pos.width &&
                 y >= pos.y && y <= pos.y + pos.height
-    }.singleOrNull()?.window
-}
-
-
-fun applyCommands(cmds: List<TilerCommand>) {
-    cmds.forEach { cmd ->
-        when(cmd) {
-            is SetWindowPosition -> {
-                desktopWindows.replaceAll {
-                    if (it.window.id == cmd.windowId) {
-                        it.copy(minimized = false, window = it.window.copy(position = cmd.position))
-                    } else {
-                        it
-                    }
-                }
-            }
-            is MinimizeWindow -> {
-                desktopWindows.replaceAll {
-                    if (it.window.id == cmd.windowId) {
-                        it.copy(minimized = true)
-                    } else { it }
-                }
-            }
-
-            is ActivateWindow -> TODO()
-            is ShowWindow -> TODO()
-        }
-    }
+    }?.window
 }
 
 
@@ -259,7 +294,7 @@ fun main() {
         )
 
         println("Retiling!")
-        applyCommands(tiler.retile())
+        os.execute(tiler.retile())
     }
 
     init(windowHandle)
