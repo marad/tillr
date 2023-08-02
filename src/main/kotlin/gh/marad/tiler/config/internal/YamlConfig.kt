@@ -8,29 +8,43 @@ import gh.marad.tiler.common.filteringrules.Rule
 import gh.marad.tiler.common.layout.GapLayoutDecorator
 import gh.marad.tiler.common.layout.Layout
 import gh.marad.tiler.common.layout.TwoColumnLayout
+import gh.marad.tiler.config.ConfigException
 import gh.marad.tiler.config.ConfigFacade
 import gh.marad.tiler.config.Hotkey
+import org.slf4j.LoggerFactory
 import org.yaml.snakeyaml.Yaml
-import java.io.InputStream
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
 
-class YamlConfig : ConfigFacade {
-    private var input: () -> InputStream? = { this::class.java.getResourceAsStream("/config.yaml") }
+class YamlConfig(configPath: String) : ConfigFacade {
+    val configPath = Paths.get(configPath)
+    private val logger = LoggerFactory.getLogger(YamlConfig::class.java)
     private var layoutCreator: () -> Layout = { TwoColumnLayout(0.55f) }
     private val filteringRules: FilteringRules = FilteringRules()
     private val hotkeys = mutableListOf<Hotkey>()
 
+    init {
+        loadConfig()
+    }
+
     @Suppress("UNCHECKED_CAST")
-    fun loadConfig(input: () -> InputStream?) {
-        this.input = input
+    fun loadConfig() {
+        logger.info("Loading config from $configPath...")
+        if (Files.notExists(configPath)) {
+            throw ConfigFileMissing(configPath)
+        }
+        val fileStream = Files.newInputStream(configPath, StandardOpenOption.READ)
         val yaml = Yaml()
-        val data = yaml.load<Map<String, Any>>(input())
+        val data = yaml.load<Map<String, Any>>(fileStream)
         readLayout(data["layout"] as Map<String, Any>)
         readFilteringRules(data["rules"] as List<Map<String, Any>>)
         readHotkeys(data["hotkeys"] as List<Map<String, Any>>)
     }
 
     override fun reload() {
-        loadConfig(input)
+        loadConfig()
     }
 
     override fun createLayout(): Layout {
@@ -110,4 +124,7 @@ class YamlConfig : ConfigFacade {
             hotkeys.add(Hotkey(key, action))
         }
     }
+
+    data class ConfigFileMissing(val path: Path)
+        : ConfigException("Configuration file '$path' does not exist")
 }

@@ -13,8 +13,9 @@ import org.slf4j.LoggerFactory
 // TODO status toolbar showing current desktop
 // TODO [maybe] widgets for status toolbar
 
+val logger = LoggerFactory.getLogger("main")
+
 fun main(args: Array<String>) {
-    val logger = LoggerFactory.getLogger("main")
     val data = Docopt("""
        Usage: 
          tillr [--yaml-config=<config-path>]
@@ -25,19 +26,21 @@ fun main(args: Array<String>) {
          -c --config   YAML configuration file path. If not specified default configuration is applied.
     """.trimIndent()).parse(*args)
 
-    val configPath = data["--yaml-config"]?.toString()
-
     try {
-        val config = if (configPath != null) {
-            logger.info("Loading configuration at $configPath...")
-            ConfigFacade.loadYamlConfig(configPath)
-        } else {
-            logger.info("Loading default configuration")
-            ConfigFacade.createConfig()
-        }
+        val config = getConfig(data)
         val app = AppFacade.createAppWithConfig(config)
         app.start()
     } catch (ex: Throwable) {
         logger.error("Unexpected error occurred", ex)
+    }
+}
+
+fun getConfig(data: Map<String, Any>): ConfigFacade {
+    val configPath = data["--yaml-config"]?.toString()
+    return if (configPath != null) {
+        ConfigFacade.loadYamlConfig(configPath)
+    } else {
+        logger.info("Loading default configuration")
+        ConfigFacade.createConfig()
     }
 }
