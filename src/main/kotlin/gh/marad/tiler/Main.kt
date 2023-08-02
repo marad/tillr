@@ -1,6 +1,7 @@
 package gh.marad.tiler
 
 import gh.marad.tiler.app.AppFacade
+import gh.marad.tiler.config.ConfigException
 import gh.marad.tiler.config.ConfigFacade
 import org.docopt.Docopt
 import org.slf4j.LoggerFactory
@@ -30,7 +31,11 @@ fun main(args: Array<String>) {
         val config = getConfig(data)
         val app = AppFacade.createAppWithConfig(config)
         app.start()
-    } catch (ex: Throwable) {
+    }
+    catch (ex: ConfigException) {
+        logger.error("Configuration error: ${ex.message}")
+    }
+    catch (ex: Throwable) {
         logger.error("Unexpected error occurred", ex)
     }
 }
