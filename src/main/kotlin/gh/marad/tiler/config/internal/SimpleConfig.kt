@@ -37,7 +37,7 @@ class SimpleConfig : ConfigFacade {
 
     override fun createLayout(): Layout {
         val twoColumnLayout = TwoColumnLayout(0.55f)
-        val minSize = MinWindowSizeLayoutDecorator(1500, 500, twoColumnLayout)
+        val minSize = MinWindowSizeLayoutDecorator(1500, 800, twoColumnLayout)
         return GapLayoutDecorator(20, minSize)
     }
 
