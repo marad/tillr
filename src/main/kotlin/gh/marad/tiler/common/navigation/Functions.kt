@@ -10,7 +10,7 @@ fun windowRight(activeWindow: Window, windows: List<Window>): Window? {
         .posXOrNull() ?: return null // there are no candidates
     return windows
         .getWindowsAtX(minXOnTheRight)
-        .getWindowNearestToY(activeWindow.position.y)
+        .getWindowNearestToY(activeWindow.position.centerY())
 }
 
 fun windowLeft(activeWindow: Window, windows: List<Window>): Window? {
@@ -20,7 +20,7 @@ fun windowLeft(activeWindow: Window, windows: List<Window>): Window? {
         .posXOrNull() ?: return null
     return windows
         .getWindowsAtX(maxXOnTheLeft)
-        .getWindowNearestToY(activeWindow.position.y)
+        .getWindowNearestToY(activeWindow.position.centerY())
 }
 
 fun windowUp(activeWindow: Window, windows: List<Window>): Window? {
@@ -30,7 +30,7 @@ fun windowUp(activeWindow: Window, windows: List<Window>): Window? {
         .posYOrNull() ?: return null
     return windows
         .getWindowsAtY(minYAbove)
-        .getWindowNearestToX(activeWindow.position.x)
+        .getWindowNearestToX(activeWindow.position.centerX())
 }
 
 fun windowDown(activeWindow: Window, windows: List<Window>): Window? {
@@ -40,7 +40,7 @@ fun windowDown(activeWindow: Window, windows: List<Window>): Window? {
         .posYOrNull() ?: return null
     return windows
         .getWindowsAtY(maxYBelow)
-        .getWindowNearestToX(activeWindow.position.x)
+        .getWindowNearestToX(activeWindow.position.centerX())
 }
 
 private fun List<Window>.takeWindowsOnTheLeftOf(activeWindow: Window) = filter { it.position.x < activeWindow.position.x }

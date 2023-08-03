@@ -98,10 +98,6 @@ class Tiler(
             .groupBy({ it.first }, { it.second })
     }
 
-    private fun LayoutSpace.containsWindowCenter(window: Window) = contains(window.position.centerX(), window.position.centerY())
-    private fun WindowPosition.centerX() = (x + width) / 2
-    private fun WindowPosition.centerY() = (y + height) / 2
-
     private fun retile(view: View, windows: Windows, space: LayoutSpace): List<TilerCommand> {
         val windowsInView = view.filterWindowsInView(windows)
 //        view.updateWindowsInView(windowsInView.map { it.id })

@@ -130,7 +130,8 @@ fun init(windowHandle: Long) {
     glfwSetKeyCallback(windowHandle) { window, key, scanCode, action, mods ->
         if (key == GLFW_KEY_A && action == GLFW_PRESS) {
             val windowID = testIdGen.next()
-            val wnd = Window(TestWindowId(windowID), "Name", "class", "exe_path", posGen2.next(), isMinimized = false, isMaximized = false, isPopup = false)
+            val wnd = Window(TestWindowId(windowID), "Name", "class", "exe_path", posGen2.next(),
+                isMinimized = false, isMaximized = false, isPopup = false, isActive = false)
             colors[windowID] = paintGen.next()
             desktopWindows.add(WindowInfo(wnd, false))
              eventHandler.windowAppeared(wnd)

@@ -6,7 +6,10 @@ package gh.marad.tiler.common
 interface WindowId
 typealias Windows = List<Window>
 
-data class WindowPosition(val x: Int, val y: Int, val width: Int, val height: Int)
+data class WindowPosition(val x: Int, val y: Int, val width: Int, val height: Int) {
+    fun centerX() = (x + width) / 2
+    fun centerY() = (y + height) / 2
+}
 data class Window(val id: WindowId,
                   val windowName: String,
                   val className: String,
@@ -15,6 +18,7 @@ data class Window(val id: WindowId,
                   val isMinimized: Boolean,
                   val isMaximized: Boolean,
                   val isPopup: Boolean,
+                  val isActive: Boolean,
     ) {
     val exeName = exePath.split("\\").last()
     fun reposition(x: Int?, y: Int?, width: Int? = null, height: Int? = null): Window {
