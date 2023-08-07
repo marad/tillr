@@ -7,8 +7,8 @@ interface WindowId
 typealias Windows = List<Window>
 
 data class WindowPosition(val x: Int, val y: Int, val width: Int, val height: Int) {
-    fun centerX() = (x + width) / 2
-    fun centerY() = (y + height) / 2
+    fun centerX() = x + (width / 2)
+    fun centerY() = y + (height / 2)
 }
 data class Window(val id: WindowId,
                   val windowName: String,
