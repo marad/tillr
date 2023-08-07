@@ -24,7 +24,7 @@ object Monitors {
                         isPrimary = (info.dwFlags and WinUser.MONITORINFOF_PRIMARY) == WinUser.MONITORINFOF_PRIMARY
                     )
                 )
-                0
+                1
             }
         u32.EnumDisplayMonitors(null, null, listMonitors , WinDef.LPARAM(0))
         return monitors
