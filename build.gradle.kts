@@ -48,7 +48,7 @@ kotlin {
 }
 
 application {
-    mainClass.set("MainKt")
+    mainClass.set("gh.marad.tiler.MainKt")
 }
 
 publishing {
