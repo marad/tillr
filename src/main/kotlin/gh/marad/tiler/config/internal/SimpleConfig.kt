@@ -36,9 +36,9 @@ class SimpleConfig : ConfigFacade {
     override fun reload() { }
 
     override fun createLayout(): Layout {
-        val twoColumnLayout = TwoColumnLayout(0.55f)
-        val minSize = MinWindowSizeLayoutDecorator(1500, 800, twoColumnLayout)
-        return GapLayoutDecorator(20, minSize)
+        var layout = TwoColumnLayout(0.55f)
+//        layout = MinWindowSizeLayoutDecorator(1500, 800, twoColumnLayout)
+        return GapLayoutDecorator(20, layout)
     }
 
     override fun getHotkeys(): List<Hotkey> {

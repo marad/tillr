@@ -80,7 +80,20 @@ class WindowsOs : OsFacade {
     }
 
     override fun execute(commands: List<TilerCommand>) {
-        commands.forEach { execute(it) }
+        var deferStruct = myU32.BeginDeferWindowPos(commands.count { it is SetWindowPosition })
+        commands.forEach {
+            if (it is SetWindowPosition) {
+                val hwnd = (it.windowId as WID).handle
+                val pos = it.position.addInvisibleBorders(windowBorders(hwnd))
+                deferStruct = myU32.DeferWindowPos(deferStruct, hwnd, null,
+                    pos.x, pos.y, pos.width, pos.height,
+                    User32.SWP_ASYNCWINDOWPOS and User32.SWP_NOACTIVATE and User32.SWP_NOZORDER and User32.SWP_SHOWWINDOW)
+            } else {
+                execute(it)
+            }
+        }
+        Thread.sleep(50)
+        myU32.EndDeferWindowPos(deferStruct)
     }
 
     override fun startEventHandling(handler: WindowEventHandler) {

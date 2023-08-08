@@ -3,6 +3,7 @@ package gh.marad.tiler.os.internal.winapi
 
 import com.sun.jna.platform.win32.WinDef.*
 import com.sun.jna.platform.win32.WinNT
+import com.sun.jna.platform.win32.WinNT.HANDLE
 import com.sun.jna.platform.win32.WinUser
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.win32.StdCallLibrary
@@ -18,4 +19,8 @@ interface MyUser32 : StdCallLibrary, WinUser, WinNT {
     fun ClientToScreen(hwnd: HWND?, point: POINT?)
 
     fun AnimateWindow(hwnd: HWND?, dwTime: DWORD, dwFlags: DWORD): Boolean
+
+    fun BeginDeferWindowPos(nNumWindows: Int): HANDLE
+    fun DeferWindowPos(hWinPosInfo: HANDLE, hWnd: HWND?, hWndInsertAfter: HWND?, x: Int, y: Int, cx: Int, cy: Int, uFlags: Int): HANDLE
+    fun EndDeferWindowPos(hWinPosInfo: HANDLE): Boolean
 }
