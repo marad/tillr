@@ -8,7 +8,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'termuin'
+          distribution: 'temurin'
       - name: Run gradle test
         uses: gradle/gradle-build-action@v2
         with:
