@@ -30,3 +30,4 @@ jobs:
           title: "Development Build"
           files: |
             build/distributions/*.zip
+            update-dev.ps1

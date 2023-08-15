@@ -7,8 +7,6 @@ import org.docopt.Docopt
 import org.slf4j.LoggerFactory
 
 // TODO ignore admin windows https://github.com/marad/tillr/issues/1 (https://stackoverflow.com/a/24144277)
-// TODO GH Actions CI/CD
-// TODO installation script
 // TODO handle fullscreen windows
 // TODO window showing registered hotkeys
 // TODO status toolbar showing current desktop
