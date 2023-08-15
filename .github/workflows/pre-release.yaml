@@ -1,13 +1,14 @@
 ---
-name: release
+name: "pre-release"
 
 on:
   push:
-    tags:
-      - v*
+    branches:
+      - main
 
 jobs:
-  create-release:
+  pre-release:
+    name: "Pre Release"
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -24,6 +25,8 @@ jobs:
       - uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: false
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
           files: |
             build/distributions/*.zip
