@@ -3,6 +3,8 @@ package gh.marad.tiler.os.internal
 import com.sun.jna.Native
 import com.sun.jna.platform.win32.User32
 import com.sun.jna.platform.win32.WinDef
+import com.sun.jna.platform.win32.WinDef.RECT
+import com.sun.jna.platform.win32.WinUser.WINDOWPLACEMENT
 import com.sun.jna.win32.W32APIOptions
 import gh.marad.tiler.common.*
 import gh.marad.tiler.common.Window
@@ -53,9 +55,17 @@ class WindowsOs : OsFacade {
                 // correct the window size to account for the invisible
                 // border of the window
                 val pos = command.position.addInvisibleBorders(windowBorders(hwnd))
-                User32.INSTANCE.SetWindowPos(hwnd, null,
-                    pos.x, pos.y, pos.width, pos.height,
-                    User32.SWP_ASYNCWINDOWPOS and User32.SWP_NOACTIVATE and User32.SWP_NOZORDER and User32.SWP_SHOWWINDOW)
+                val placement = WINDOWPLACEMENT()
+                placement.length = placement.size()
+                placement.flags = WINDOWPLACEMENT.WPF_ASYNCWINDOWPLACEMENT
+                placement.showCmd = User32.SW_SHOWNOACTIVATE and User32.SWP_NOZORDER
+                val r = RECT()
+                r.left = pos.x
+                r.top = pos.y
+                r.right = pos.x + pos.width
+                r.bottom = pos.y + pos.height
+                placement.rcNormalPosition = r
+                User32.INSTANCE.SetWindowPlacement(hwnd, placement)
             }
 
             is MinimizeWindow -> {
@@ -82,15 +92,16 @@ class WindowsOs : OsFacade {
     override fun execute(commands: List<TilerCommand>) {
         var deferStruct = myU32.BeginDeferWindowPos(commands.count { it is SetWindowPosition })
         commands.forEach {
-            if (it is SetWindowPosition) {
-                val hwnd = (it.windowId as WID).handle
-                val pos = it.position.addInvisibleBorders(windowBorders(hwnd))
-                deferStruct = myU32.DeferWindowPos(deferStruct, hwnd, null,
-                    pos.x, pos.y, pos.width, pos.height,
-                    User32.SWP_ASYNCWINDOWPOS and User32.SWP_NOACTIVATE and User32.SWP_NOZORDER and User32.SWP_SHOWWINDOW)
-            } else {
+//            if (it is SetWindowPosition) {
+//                val hwnd = (it.windowId as WID).handle
+//                val pos = it.position.addInvisibleBorders(windowBorders(hwnd))
+//                deferStruct = myU32.DeferWindowPos(deferStruct, hwnd, null,
+//                    pos.x, pos.y, pos.width, pos.height,
+//                    User32.SWP_ASYNCWINDOWPOS and User32.SWP_NOACTIVATE and User32.SWP_NOZORDER and User32.SWP_SHOWWINDOW
+//                )
+//            } else {
                 execute(it)
-            }
+//            }
         }
         Thread.sleep(50)
         myU32.EndDeferWindowPos(deferStruct)

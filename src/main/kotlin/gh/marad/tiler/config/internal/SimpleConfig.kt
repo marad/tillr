@@ -65,8 +65,8 @@ class SimpleConfig : ConfigFacade {
             Hotkey("S-A-C-K", MoveWindowUp),
 
             // Layout
-            Hotkey("S-A-L", LayoutIncrease(0.03f)),
-            Hotkey("S-A-H", LayoutDecrease(0.03f))
+            Hotkey("S-A-L", LayoutIncrease(0.05f)),
+            Hotkey("S-A-H", LayoutDecrease(0.05f))
         )
     }
 
