@@ -7,7 +7,6 @@ import gh.marad.tiler.common.filteringrules.FilteringRules
 import gh.marad.tiler.common.filteringrules.Rule
 import gh.marad.tiler.common.layout.GapLayoutDecorator
 import gh.marad.tiler.common.layout.Layout
-import gh.marad.tiler.common.layout.MinWindowSizeLayoutDecorator
 import gh.marad.tiler.common.layout.TwoColumnLayout
 import gh.marad.tiler.config.ConfigFacade
 import gh.marad.tiler.config.Hotkey
@@ -36,7 +35,7 @@ class SimpleConfig : ConfigFacade {
     override fun reload() { }
 
     override fun createLayout(): Layout {
-        var layout = TwoColumnLayout(0.55f)
+        val layout = TwoColumnLayout(0.55f)
 //        layout = MinWindowSizeLayoutDecorator(1500, 800, twoColumnLayout)
         return GapLayoutDecorator(20, layout)
     }
@@ -65,8 +64,8 @@ class SimpleConfig : ConfigFacade {
             Hotkey("S-A-C-K", MoveWindowUp),
 
             // Layout
-            Hotkey("S-A-L", LayoutIncrease(0.03f)),
-            Hotkey("S-A-H", LayoutDecrease(0.03f))
+            Hotkey("S-A-L", LayoutIncrease(0.05f)),
+            Hotkey("S-A-H", LayoutDecrease(0.05f))
         )
     }
 
