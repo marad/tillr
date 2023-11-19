@@ -44,7 +44,7 @@ val posGen = arbitrary { rs: RandomSource ->
 
 val windowGen = arbitrary { rs ->
     Window(windowIdGen.next(rs), windowTitles.next(rs), classNames.next(rs), "exe_path", posGen.next(rs),
-        isMinimized = false, isMaximized = false, isPopup = false, isActive = false)
+        isMinimized = false, isMaximized = false, isPopup = false, isActive = false, isVisible = true)
 }
 
 //class CoreTest {
