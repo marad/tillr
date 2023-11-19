@@ -6,7 +6,6 @@ import gh.marad.tiler.config.ConfigFacade
 import org.docopt.Docopt
 import org.slf4j.LoggerFactory
 
-// TODO ignore admin windows https://github.com/marad/tillr/issues/1 (https://stackoverflow.com/a/24144277)
 // TODO handle fullscreen windows
 // TODO window showing registered hotkeys
 // TODO status toolbar showing current desktop
