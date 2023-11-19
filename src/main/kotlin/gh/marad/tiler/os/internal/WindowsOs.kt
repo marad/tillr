@@ -1,6 +1,7 @@
 package gh.marad.tiler.os.internal
 
 import com.sun.jna.platform.win32.User32
+import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.platform.win32.WinDef.RECT
 import com.sun.jna.platform.win32.WinUser.WINDOWPLACEMENT
 import gh.marad.tiler.common.*
@@ -11,7 +12,9 @@ import gh.marad.tiler.os.internal.winapi.*
 import gh.marad.tiler.os.internal.winapi.Window as OsWindow
 
 class WindowsOs : OsFacade {
-    private val hotkeys = Hotkeys()
+    companion object {
+        private val hotkeys = Hotkeys()
+    }
 //    private val myU32 = Native.load("user32", MyUser32::class.java, W32APIOptions.DEFAULT_OPTIONS)
 
     override fun getDesktopState(): DesktopState {
@@ -76,7 +79,7 @@ class WindowsOs : OsFacade {
             is ShowWindow -> {
                 val hwnd = (command.windowId as WID).handle
                 User32.INSTANCE.ShowWindow(hwnd, User32.SW_SHOWNOACTIVATE)
-//                User32.INSTANCE.RedrawWindow(hwnd, null, null, WinDef.DWORD(User32.RDW_INVALIDATE.toLong()))
+                User32.INSTANCE.RedrawWindow(hwnd, null, null, WinDef.DWORD(User32.RDW_INVALIDATE.toLong()))
             }
 
             is ActivateWindow -> {
@@ -123,6 +126,9 @@ class WindowsOs : OsFacade {
         return targetPosition.left == actualPosition.left &&
                 targetPosition.top == actualPosition.top
     }
+
+    override fun userHome(): String =
+        System.getenv("userprofile")
 
     override fun windowDebugInfo(window: Window): String {
         val wid = window.id as WID

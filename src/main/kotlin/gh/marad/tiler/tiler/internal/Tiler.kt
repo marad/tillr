@@ -25,7 +25,7 @@ class Tiler(
     override fun initializeWithOpenWindows(): List<TilerCommand> {
         if (!enabled) return emptyList()
         viewManager.changeCurrentView(0)
-        os.getDesktopState().getManagableWindows(filteringRules).forEach {
+        os.getDesktopState().getManagableWindows(filteringRules).reversed().forEach {
             if (!it.isPopup && !it.isMinimized && it.isVisible) {
                 viewManager.currentView().addWindow(it.id)
             }

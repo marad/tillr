@@ -1,6 +1,7 @@
 package gh.marad.tiler.app.internal
 
 import gh.marad.tiler.actions.ActionsFacade
+import gh.marad.tiler.actions.ReloadConfig
 import gh.marad.tiler.app.AppFacade
 import gh.marad.tiler.common.BroadcastingEventHandler
 import gh.marad.tiler.config.ConfigFacade
@@ -8,6 +9,7 @@ import gh.marad.tiler.config.Hotkey
 import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.tiler.TilerFacade
 import org.slf4j.LoggerFactory
+import java.awt.MenuItem
 import java.awt.SystemTray
 import java.awt.Toolkit
 import java.awt.TrayIcon
@@ -17,7 +19,7 @@ class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, va
 
     @Suppress("UNUSED_VARIABLE")
     override fun start() {
-        val trayIcon = createTrayIcon(os, tiler)
+        val trayIcon = createTrayIcon(os, tiler, actions)
         setupHotkeys(config.getHotkeys())
         actions.registerActionListener(ActionHandler(this, os, tiler))
         val executor = TilerCommandsExecutorAndWatcher(os, config.getFilteringRules())
@@ -48,7 +50,7 @@ class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, va
         }
     }
 
-    private fun createTrayIcon(os: OsFacade, tiler: TilerFacade): TrayIcon {
+    private fun createTrayIcon(os: OsFacade, tiler: TilerFacade, actions: ActionsFacade): TrayIcon {
         val icon = Toolkit.getDefaultToolkit().getImage(AppFacade::class.java.getResource("/icon.png"))
         val stopped = Toolkit.getDefaultToolkit().getImage(AppFacade::class.java.getResource("/stopped_icon.png"))
         val trayIcon = TrayIcon(icon, "Tiler")
@@ -59,6 +61,7 @@ class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, va
 
         trayIcon.addMouseListener(object : java.awt.event.MouseAdapter() {
             override fun mouseClicked(e: java.awt.event.MouseEvent?) {
+                // TODO: This should be extracted to actions
                 if (e?.button == java.awt.event.MouseEvent.BUTTON1) {
                     if (trayIcon.image == stopped) {
                         trayIcon.image = icon
@@ -73,7 +76,17 @@ class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, va
         })
 
         val popupMenu = java.awt.PopupMenu()
-        popupMenu.add(java.awt.MenuItem("Exit")).addActionListener {
+        if (config.getConfigPath() != null) {
+            popupMenu.add(MenuItem("Edit config")).addActionListener {
+                val editor = ProcessBuilder(config.configEditorPath(), config.getConfigPath())
+                editor.start()
+            }
+            popupMenu.add(MenuItem("Reload config")).addActionListener {
+                actions.invokeAction(ReloadConfig)
+            }
+            popupMenu.addSeparator()
+        }
+        popupMenu.add(MenuItem("Exit")).addActionListener {
             System.exit(0)
         }
         trayIcon.popupMenu = popupMenu

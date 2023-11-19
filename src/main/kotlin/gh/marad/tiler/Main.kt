@@ -3,6 +3,7 @@ package gh.marad.tiler
 import gh.marad.tiler.app.AppFacade
 import gh.marad.tiler.config.ConfigException
 import gh.marad.tiler.config.ConfigFacade
+import gh.marad.tiler.os.OsFacade
 import org.docopt.Docopt
 import org.slf4j.LoggerFactory
 
@@ -42,6 +43,6 @@ fun getConfig(data: Map<String, Any>): ConfigFacade {
         ConfigFacade.loadYamlConfig(configPath)
     } else {
         logger.info("Loading default configuration")
-        ConfigFacade.createConfig()
+        ConfigFacade.createConfig(OsFacade.createWindowsFacade())
     }
 }

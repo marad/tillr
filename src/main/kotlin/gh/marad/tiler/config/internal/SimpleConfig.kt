@@ -73,4 +73,9 @@ class SimpleConfig : ConfigFacade {
     override fun getFilteringRules(): FilteringRules = filteringRules
 
     override fun getAssignments(): WindowAssignments = assignments
+
+    override fun getConfigPath(): String? = null
+    override fun configEditorPath(): String {
+        TODO("Not yet implemented")
+    }
 }
