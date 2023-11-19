@@ -2,6 +2,7 @@ package gh.marad.tiler.app.internal
 
 import gh.marad.tiler.actions.ActionsFacade
 import gh.marad.tiler.app.AppFacade
+import gh.marad.tiler.common.BroadcastingEventHandler
 import gh.marad.tiler.config.ConfigFacade
 import gh.marad.tiler.config.Hotkey
 import gh.marad.tiler.os.OsFacade
@@ -20,7 +21,11 @@ class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, va
         setupHotkeys(config.getHotkeys())
         actions.registerActionListener(ActionHandler(this, os, tiler))
         os.execute(tiler.initializeWithOpenWindows())
-        os.startEventHandling(TilerWindowEventHandler(tiler, config.getFilteringRules(), os))
+        val evenHandler = BroadcastingEventHandler(
+            TilerWindowEventHandler(tiler, config.getFilteringRules(), os),
+            RestoreWindowsOnExitEventHandler(os)
+        )
+        os.startEventHandling(evenHandler)
     }
 
     override fun reloadConfig() {

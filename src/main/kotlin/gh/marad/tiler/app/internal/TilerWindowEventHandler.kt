@@ -38,7 +38,7 @@ class TilerWindowEventHandler(
     }
 
     override fun windowMovedOrResized(window: Window) {
-        val foundWindow = os.windowsUnderCursor().lastOrNull()
+        val foundWindow = os.windowsUnderCursor().lastOrNull { it.isVisible }
         if (foundWindow != null && foundWindow.id != window.id) {
             os.execute(tiler.swapWindows(window, foundWindow))
         } else {

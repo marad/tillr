@@ -1,7 +1,6 @@
 package gh.marad.tiler.os.internal
 
 import com.sun.jna.platform.win32.User32
-import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.platform.win32.WinDef.RECT
 import com.sun.jna.platform.win32.WinUser.WINDOWPLACEMENT
 import gh.marad.tiler.common.*
@@ -17,7 +16,11 @@ class WindowsOs : OsFacade {
 
     override fun getDesktopState(): DesktopState {
         val monitors = Monitors.list().map { Monitor(it.workArea.toLayoutSpace(), it.isPrimary) }
-        val windows = gh.marad.tiler.os.internal.winapi.listWindows().map { it.toTilerWindow() }
+        val windows = gh.marad.tiler.os.internal.winapi.listWindows().mapNotNull {
+            if (it.isWindow()) {
+                it.toTilerWindow()
+            } else null
+        }
         return DesktopState(monitors, windows)
     }
 
@@ -58,23 +61,23 @@ class WindowsOs : OsFacade {
                 placement.flags = WINDOWPLACEMENT.WPF_ASYNCWINDOWPLACEMENT
                 placement.showCmd = User32.SW_SHOWNOACTIVATE and User32.SWP_NOZORDER
                 val r = RECT()
-                r.left = pos.x
+                r.left = pos.x + 1
                 r.top = pos.y
-                r.right = pos.x + pos.width
-                r.bottom = pos.y + pos.height
+                r.right = pos.x + pos.width - 1
+                r.bottom = pos.y + pos.height - 1
                 placement.rcNormalPosition = r
                 User32.INSTANCE.SetWindowPlacement(hwnd, placement)
             }
 
             is MinimizeWindow -> {
                 val hwnd = (command.windowId as WID).handle
-                User32.INSTANCE.ShowWindow(hwnd, User32.SW_SHOWMINNOACTIVE)
+                User32.INSTANCE.ShowWindow(hwnd, User32.SW_HIDE)
             }
 
             is ShowWindow -> {
                 val hwnd = (command.windowId as WID).handle
                 User32.INSTANCE.ShowWindow(hwnd, User32.SW_SHOWNOACTIVATE)
-                User32.INSTANCE.RedrawWindow(hwnd, null, null, WinDef.DWORD(User32.RDW_INVALIDATE.toLong()))
+//                User32.INSTANCE.RedrawWindow(hwnd, null, null, WinDef.DWORD(User32.RDW_INVALIDATE.toLong()))
             }
 
             is ActivateWindow -> {

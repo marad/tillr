@@ -26,7 +26,7 @@ class Tiler(
         if (!enabled) return emptyList()
         viewManager.changeCurrentView(0)
         os.getDesktopState().getManagableWindows(filteringRules).forEach {
-            if (!it.isPopup && !it.isMinimized) {
+            if (!it.isPopup && !it.isMinimized && it.isVisible) {
                 viewManager.currentView().addWindow(it.id)
             }
 

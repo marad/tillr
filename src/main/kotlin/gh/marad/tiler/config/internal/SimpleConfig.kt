@@ -24,10 +24,10 @@ class SimpleConfig : ConfigFacade {
     private val assignments = WindowAssignments().also { assignments ->
         assignments.addAll(
             listOf(
-                Assign.viewToWindow(1) { it.exeName == "chrome.exe" && !it.windowName.contains("Kalendarz Google") },
-                Assign.viewToWindow(2) { it.exeName == "idea64.exe" },
-                Assign.viewToWindow(3) { it.windowName == "WhatsApp" },
-                Assign.viewToWindow(3) { it.windowName == "Messenger" },
+//                Assign.viewToWindow(1) { it.exeName == "chrome.exe" && !it.windowName.contains("Kalendarz Google") },
+//                Assign.viewToWindow(2) { it.exeName == "idea64.exe" },
+//                Assign.viewToWindow(3) { it.windowName == "WhatsApp" },
+//                Assign.viewToWindow(3) { it.windowName == "Messenger" },
             )
         )
     }
@@ -37,22 +37,25 @@ class SimpleConfig : ConfigFacade {
     override fun createLayout(): Layout {
         val layout = TwoColumnLayout(0.55f)
 //        layout = MinWindowSizeLayoutDecorator(1500, 800, twoColumnLayout)
-        return GapLayoutDecorator(20, layout)
+//        return GapLayoutDecorator(20, layout)
+        return layout;
     }
 
     override fun getHotkeys(): List<Hotkey> {
         return listOf(
             // Switch view
-            Hotkey("S-A-C-U", SwitchView(0)),
-            Hotkey("S-A-C-I", SwitchView(1)),
-            Hotkey("S-A-C-O", SwitchView(2)),
-            Hotkey("S-A-C-P", SwitchView(3)),
+            Hotkey("S-A-C-Y", SwitchView(0)),
+            Hotkey("S-A-C-U", SwitchView(1)),
+            Hotkey("S-A-C-I", SwitchView(2)),
+            Hotkey("S-A-C-O", SwitchView(3)),
+            Hotkey("S-A-C-P", SwitchView(4)),
 
             // Move window to view
-            Hotkey("S-A-U", MoveActiveWindowToView(0)),
-            Hotkey("S-A-I", MoveActiveWindowToView(1)),
-            Hotkey("S-A-O", MoveActiveWindowToView(2)),
-            Hotkey("S-A-P", MoveActiveWindowToView(3)),
+            Hotkey("S-A-Y", MoveActiveWindowToView(0)),
+            Hotkey("S-A-U", MoveActiveWindowToView(1)),
+            Hotkey("S-A-I", MoveActiveWindowToView(2)),
+            Hotkey("S-A-O", MoveActiveWindowToView(3)),
+            Hotkey("S-A-P", MoveActiveWindowToView(4)),
 
             // Switch to previous view
             Hotkey("S-A-C-E", SwitchToPreviousView),
