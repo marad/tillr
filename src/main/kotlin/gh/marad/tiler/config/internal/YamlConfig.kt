@@ -92,6 +92,7 @@ class YamlConfig(configPath: String) : ConfigFacade {
     }
 
     private fun readFilteringRules(rules: List<Map<String, Any>>) {
+        filteringRules.clear()
         rules.forEach { ruleSpec ->
             val title = ruleSpec["title"]?.toString()
             val className = ruleSpec["class"]?.toString()
@@ -109,7 +110,6 @@ class YamlConfig(configPath: String) : ConfigFacade {
                 "ignore" -> Rule.ignoreIf(check)
                 else -> throw IllegalArgumentException("Unknown rule type: $title")
             }
-            filteringRules.clear()
             filteringRules.add(rule)
         }
 

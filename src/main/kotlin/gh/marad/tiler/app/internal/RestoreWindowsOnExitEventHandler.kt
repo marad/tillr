@@ -6,6 +6,8 @@ import gh.marad.tiler.common.WindowId
 import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.os.WindowEventHandler
 
+/// Tracks all the windows and shows hidden ones (the ones on other views) when JVM is being closed.
+/// This way you will not end up with hidden windows and now way of showing them.
 class RestoreWindowsOnExitEventHandler(os: OsFacade) : WindowEventHandler {
     private val windows = mutableSetOf<WindowId>()
     init {
