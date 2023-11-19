@@ -15,6 +15,7 @@ interface OsFacade {
     fun execute(commands: List<TilerCommand>)
     fun startEventHandling(handler: WindowEventHandler)
     fun isWindowAtPosition(windowId: WindowId, position: WindowPosition): Boolean
+    fun userHome(): String
     fun windowDebugInfo(window: Window): String
 
     companion object {

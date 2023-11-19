@@ -1,0 +1,70 @@
+editor: "C:\\Program Files\\Neovim\\bin\\nvim-qt.exe"
+
+layout:
+  gap: 0
+  ratio: 0.55
+
+rules:
+  - exeName: "nvim-qt.exe"
+    should: manage
+
+hotkeys:
+  # Switch windows
+  - key: S-C-A-Y
+    action: SwitchView
+    value: 0
+  - key: S-C-A-U
+    action: SwitchView
+    value: 1
+  - key: S-C-A-I
+    action: SwitchView
+    value: 2
+  - key: S-C-A-O
+    action: SwitchView
+    value: 3
+  - key: S-C-A-P
+    action: SwitchView
+    value: 4
+
+  # Move window to view
+  - key: S-A-Y
+    action: MoveActiveWindowToView
+    value: 0
+  - key: S-A-U
+    action: MoveActiveWindowToView
+    value: 1
+  - key: S-A-I
+    action: MoveActiveWindowToView
+    value: 3
+  - key: S-A-O
+    action: MoveActiveWindowToView
+    value: 4
+  - key: S-A-P
+    action: MoveActiveWindowToView
+    value: 5
+
+  # Switch to previous window
+  - key: S-C-A-F
+    action: SwitchToPreviousView
+
+  # Window navigation
+  - key: S-C-A-H
+    action: MoveWindowLeft
+  - key: S-C-A-J
+    action: MoveWindowDown
+  - key: S-C-A-K
+    action: MoveWindowUp
+  - key: S-C-A-L
+    action: MoveWindowRight
+
+  # Layout ratio change
+  - key: S-A-L
+    action: LayoutIncrease
+    value: 0.05
+  - key: S-A-H
+    action: LayoutDecrease
+    value: 0.05
+
+  # Reload config
+  - key: S-C-A-R
+    action: ReloadConfig

@@ -25,12 +25,12 @@ class YamlConfig(configPath: String) : ConfigFacade {
     private var layoutCreator: () -> Layout = { TwoColumnLayout(0.55f) }
     private val filteringRules: FilteringRules = FilteringRules()
     private val hotkeys = mutableListOf<Hotkey>()
+    private var configEditorPath: String = "notepad.exe"
 
     init {
         loadConfig()
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun loadConfig() {
         logger.info("Loading config from $configPath...")
         if (Files.notExists(configPath)) {
@@ -39,9 +39,12 @@ class YamlConfig(configPath: String) : ConfigFacade {
         val fileStream = Files.newInputStream(configPath, StandardOpenOption.READ)
         val yaml = Yaml()
         val data = yaml.load<Map<String, Any>>(fileStream)
-        readLayout(data["layout"] as Map<String, Any>)
-        readFilteringRules(data["rules"] as List<Map<String, Any>>)
-        readHotkeys(data["hotkeys"] as List<Map<String, Any>>)
+        if (data != null) {
+            configEditorPath = data["editor"]?.toString() ?: configEditorPath
+            readLayout(data["layout"])
+            readFilteringRules(data["rules"])
+            readHotkeys(data["hotkeys"])
+        }
     }
 
     override fun reload() {
@@ -61,14 +64,28 @@ class YamlConfig(configPath: String) : ConfigFacade {
     }
 
     override fun getAssignments(): WindowAssignments {
-        TODO("Not yet implemented")
+        return WindowAssignments()
+    }
+
+    override fun getConfigPath(): String {
+        return configPath.toAbsolutePath().toString()
+    }
+
+    override fun configEditorPath(): String {
+        return configEditorPath
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun readLayout(data: Map<String, Any>) {
-        val name = data["name"].toString()
-        val gap = data["gap"].toString().toInt()
-        val ratio =  data["ratio"].toString().toFloat()
+    private fun readLayout(section: Any?) {
+        val data = if (section != null) {
+            section as Map<String, Any>
+        } else {
+            return
+        }
+
+        val name = data["name"]?.toString() ?: "TwoColumnLayout"
+        val gap = data["gap"]?.toString()?.toInt() ?: 0
+        val ratio = data["ratio"]?.toString()?.toFloat() ?: 0.55f
         val minSize = data["minSize"] as Map<String, Any>?
 
         layoutCreator = when (name) {
@@ -78,11 +95,13 @@ class YamlConfig(configPath: String) : ConfigFacade {
 
         if (minSize != null) {
             val wrappedLayout = layoutCreator
-            layoutCreator = { MinWindowSizeLayoutDecorator(
-                minimumWidth = minSize["width"]?.toString()?.toInt() ?: 1,
-                minimumHeight = minSize["height"]?.toString()?.toInt()  ?: 1,
-                wrappedLayout = wrappedLayout()
-            ) }
+            layoutCreator = {
+                MinWindowSizeLayoutDecorator(
+                    minimumWidth = minSize["width"]?.toString()?.toInt() ?: 1,
+                    minimumHeight = minSize["height"]?.toString()?.toInt() ?: 1,
+                    wrappedLayout = wrappedLayout()
+                )
+            }
         }
 
         if (gap != 0) {
@@ -91,7 +110,14 @@ class YamlConfig(configPath: String) : ConfigFacade {
         }
     }
 
-    private fun readFilteringRules(rules: List<Map<String, Any>>) {
+    private fun readFilteringRules(section: Any?) {
+        val rules = if (section != null) {
+            @Suppress("UNCHECKED_CAST")
+            section as List<Map<String, Any>>
+        } else {
+            return
+        }
+
         filteringRules.clear()
         rules.forEach { ruleSpec ->
             val title = ruleSpec["title"]?.toString()
@@ -115,7 +141,13 @@ class YamlConfig(configPath: String) : ConfigFacade {
 
     }
 
-    private fun readHotkeys(hotkeysConfig: List<Map<String, Any>>) {
+    private fun readHotkeys(section: Any?) {
+        val hotkeysConfig = if (section != null) {
+            @Suppress("UNCHECKED_CAST")
+            section as List<Map<String, Any>>
+        } else {
+            return
+        }
         hotkeys.clear()
         hotkeysConfig.forEach { map ->
             val key = map["key"].toString()

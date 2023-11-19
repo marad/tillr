@@ -64,6 +64,10 @@ val os = object : OsFacade {
         TODO("Not yet implemented")
     }
 
+    override fun userHome(): String {
+        TODO("Not yet implemented")
+    }
+
     override fun execute(command: TilerCommand) {
         TODO("Not yet implemented")
     }
@@ -99,7 +103,7 @@ val os = object : OsFacade {
     }
 
 }
-val config = ConfigFacade.createConfig()
+val config = ConfigFacade.createConfig(os)
 val tiler = TilerFacade.createTiler(config, os)
 val executor = TilerCommandsExecutorAndWatcher(os, filteringRules)
 val eventHandler = TilerWindowEventHandler(tiler, filteringRules, os, executor)
