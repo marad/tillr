@@ -66,5 +66,9 @@ fun windowBorders(hwnd: HWND): WindowBorders {
     val bottomRight = POINT(clientRect.toRectangle().width, clientRect.toRectangle().height)
     myU32.ClientToScreen(hwnd, topLeft)
     myU32.ClientToScreen(hwnd, bottomRight)
-    return WindowBorders(topLeft.x - windowRect.left, topLeft.y - windowRect.top, windowRect.right - bottomRight.x, windowRect.bottom - bottomRight.y)
+    return WindowBorders(
+        topLeft.x - windowRect.left - 1,
+        topLeft.y - windowRect.top,
+        windowRect.right - bottomRight.x - 1,
+        windowRect.bottom - bottomRight.y - 1)
 }

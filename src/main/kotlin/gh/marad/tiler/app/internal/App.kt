@@ -20,9 +20,10 @@ class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, va
         val trayIcon = createTrayIcon(os, tiler)
         setupHotkeys(config.getHotkeys())
         actions.registerActionListener(ActionHandler(this, os, tiler))
-        os.execute(tiler.initializeWithOpenWindows())
+        val executor = TilerCommandsExecutorAndWatcher(os, config.getFilteringRules())
+        executor.execute(tiler.initializeWithOpenWindows())
         val evenHandler = BroadcastingEventHandler(
-            TilerWindowEventHandler(tiler, config.getFilteringRules(), os),
+            TilerWindowEventHandler(tiler, config.getFilteringRules(), os, executor),
             RestoreWindowsOnExitEventHandler(os)
         )
         os.startEventHandling(evenHandler)

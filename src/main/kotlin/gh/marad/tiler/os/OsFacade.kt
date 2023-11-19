@@ -1,9 +1,6 @@
 package gh.marad.tiler.os
 
-import gh.marad.tiler.common.DesktopState
-import gh.marad.tiler.common.TilerCommand
-import gh.marad.tiler.common.Window
-import gh.marad.tiler.common.WindowId
+import gh.marad.tiler.common.*
 import gh.marad.tiler.os.internal.WindowsOs
 
 interface OsFacade {
@@ -17,6 +14,7 @@ interface OsFacade {
     fun execute(command: TilerCommand)
     fun execute(commands: List<TilerCommand>)
     fun startEventHandling(handler: WindowEventHandler)
+    fun isWindowAtPosition(windowId: WindowId, position: WindowPosition): Boolean
     fun windowDebugInfo(window: Window): String
 
     companion object {

@@ -58,13 +58,12 @@ class WindowsOs : OsFacade {
                 val pos = command.position.addInvisibleBorders(windowBorders(hwnd))
                 val placement = WINDOWPLACEMENT()
                 placement.length = placement.size()
-                placement.flags = WINDOWPLACEMENT.WPF_ASYNCWINDOWPLACEMENT
                 placement.showCmd = User32.SW_SHOWNOACTIVATE and User32.SWP_NOZORDER
                 val r = RECT()
-                r.left = pos.x + 1
+                r.left = pos.x
                 r.top = pos.y
-                r.right = pos.x + pos.width - 1
-                r.bottom = pos.y + pos.height - 1
+                r.right = pos.x + pos.width
+                r.bottom = pos.y + pos.height
                 placement.rcNormalPosition = r
                 User32.INSTANCE.SetWindowPlacement(hwnd, placement)
             }
@@ -112,6 +111,17 @@ class WindowsOs : OsFacade {
         val tilerProc = generateEventProcedure(handler)
         User32.INSTANCE.SetWinEventHook(EVENT_MIN, EVENT_MAX, null, tilerProc, 0, 0, 0)
         windowsMainLoop()
+    }
+
+    override fun isWindowAtPosition(windowId: WindowId, position: WindowPosition): Boolean {
+        val hwnd = (windowId as WID).handle
+        val placement = WINDOWPLACEMENT()
+        User32.INSTANCE.GetWindowPlacement(hwnd, placement)
+        val actualPosition = placement.rcNormalPosition
+        val targetPosition = position.addInvisibleBorders(windowBorders(hwnd))
+
+        return targetPosition.left == actualPosition.left &&
+                targetPosition.top == actualPosition.top
     }
 
     override fun windowDebugInfo(window: Window): String {
