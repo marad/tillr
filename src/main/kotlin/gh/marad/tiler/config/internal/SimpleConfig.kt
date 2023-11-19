@@ -1,11 +1,9 @@
 package gh.marad.tiler.config.internal
 
 import gh.marad.tiler.actions.*
-import gh.marad.tiler.common.assignments.Assign
 import gh.marad.tiler.common.assignments.WindowAssignments
 import gh.marad.tiler.common.filteringrules.FilteringRules
 import gh.marad.tiler.common.filteringrules.Rule
-import gh.marad.tiler.common.layout.GapLayoutDecorator
 import gh.marad.tiler.common.layout.Layout
 import gh.marad.tiler.common.layout.TwoColumnLayout
 import gh.marad.tiler.config.ConfigFacade
@@ -38,7 +36,7 @@ class SimpleConfig : ConfigFacade {
         val layout = TwoColumnLayout(0.55f)
 //        layout = MinWindowSizeLayoutDecorator(1500, 800, twoColumnLayout)
 //        return GapLayoutDecorator(20, layout)
-        return layout;
+        return layout
     }
 
     override fun getHotkeys(): List<Hotkey> {

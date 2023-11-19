@@ -69,7 +69,7 @@ class YamlConfig(configPath: String) : ConfigFacade {
         val name = data["name"].toString()
         val gap = data["gap"].toString().toInt()
         val ratio =  data["ratio"].toString().toFloat()
-        val minSize = data["minSize"] as Map<String, Any>
+        val minSize = data["minSize"] as Map<String, Any>?
 
         layoutCreator = when (name) {
             "TwoColumnLayout" -> { {TwoColumnLayout(ratio)} }
