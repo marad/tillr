@@ -27,5 +27,6 @@ fun OsWindow.toTilerWindow() = TilerWindow(
     isMinimized(),
     isMaximized(),
     isPopup(),
-    isActive()
+    isActive(),
+    isVisible()
 )

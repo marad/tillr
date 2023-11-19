@@ -1,7 +1,6 @@
 package gh.marad.tiler.os.internal
 
 import com.sun.jna.platform.win32.User32
-import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.platform.win32.WinDef.RECT
 import com.sun.jna.platform.win32.WinUser.WINDOWPLACEMENT
 import gh.marad.tiler.common.*
@@ -17,7 +16,11 @@ class WindowsOs : OsFacade {
 
     override fun getDesktopState(): DesktopState {
         val monitors = Monitors.list().map { Monitor(it.workArea.toLayoutSpace(), it.isPrimary) }
-        val windows = gh.marad.tiler.os.internal.winapi.listWindows().map { it.toTilerWindow() }
+        val windows = gh.marad.tiler.os.internal.winapi.listWindows().mapNotNull {
+            if (it.isWindow()) {
+                it.toTilerWindow()
+            } else null
+        }
         return DesktopState(monitors, windows)
     }
 
@@ -55,7 +58,6 @@ class WindowsOs : OsFacade {
                 val pos = command.position.addInvisibleBorders(windowBorders(hwnd))
                 val placement = WINDOWPLACEMENT()
                 placement.length = placement.size()
-                placement.flags = WINDOWPLACEMENT.WPF_ASYNCWINDOWPLACEMENT
                 placement.showCmd = User32.SW_SHOWNOACTIVATE and User32.SWP_NOZORDER
                 val r = RECT()
                 r.left = pos.x
@@ -68,13 +70,13 @@ class WindowsOs : OsFacade {
 
             is MinimizeWindow -> {
                 val hwnd = (command.windowId as WID).handle
-                User32.INSTANCE.ShowWindow(hwnd, User32.SW_SHOWMINNOACTIVE)
+                User32.INSTANCE.ShowWindow(hwnd, User32.SW_HIDE)
             }
 
             is ShowWindow -> {
                 val hwnd = (command.windowId as WID).handle
                 User32.INSTANCE.ShowWindow(hwnd, User32.SW_SHOWNOACTIVATE)
-                User32.INSTANCE.RedrawWindow(hwnd, null, null, WinDef.DWORD(User32.RDW_INVALIDATE.toLong()))
+//                User32.INSTANCE.RedrawWindow(hwnd, null, null, WinDef.DWORD(User32.RDW_INVALIDATE.toLong()))
             }
 
             is ActivateWindow -> {
@@ -109,6 +111,17 @@ class WindowsOs : OsFacade {
         val tilerProc = generateEventProcedure(handler)
         User32.INSTANCE.SetWinEventHook(EVENT_MIN, EVENT_MAX, null, tilerProc, 0, 0, 0)
         windowsMainLoop()
+    }
+
+    override fun isWindowAtPosition(windowId: WindowId, position: WindowPosition): Boolean {
+        val hwnd = (windowId as WID).handle
+        val placement = WINDOWPLACEMENT()
+        User32.INSTANCE.GetWindowPlacement(hwnd, placement)
+        val actualPosition = placement.rcNormalPosition
+        val targetPosition = position.addInvisibleBorders(windowBorders(hwnd))
+
+        return targetPosition.left == actualPosition.left &&
+                targetPosition.top == actualPosition.top
     }
 
     override fun windowDebugInfo(window: Window): String {

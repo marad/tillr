@@ -26,7 +26,7 @@ class Tiler(
         if (!enabled) return emptyList()
         viewManager.changeCurrentView(0)
         os.getDesktopState().getManagableWindows(filteringRules).forEach {
-            if (!it.isPopup && !it.isMinimized) {
+            if (!it.isPopup && !it.isMinimized && it.isVisible) {
                 viewManager.currentView().addWindow(it.id)
             }
 
@@ -59,13 +59,23 @@ class Tiler(
 
     override fun removeWindow(window: Window): List<TilerCommand> {
         viewManager.currentView().removeWindow(window.id)
-        return retile()
+        val windowToActivate = viewManager.currentView().windowToActivate()
+        return if (windowToActivate != null) {
+            retile() + ActivateWindow(windowToActivate)
+        } else {
+            retile()
+        }
     }
 
     override fun moveWindow(window: TilerWindow, viewId: Int): List<TilerCommand> {
         if (!enabled) return emptyList()
         viewManager.moveWindow(window.id, viewId)
-        return (listOf(MinimizeWindow(window.id)) + retile())
+        val windowToActivate = viewManager.currentView().windowToActivate()
+        return if (windowToActivate != null) {
+            (listOf(MinimizeWindow(window.id), ActivateWindow(windowToActivate)) + retile())
+        } else {
+            (listOf(MinimizeWindow(window.id)) + retile())
+        }
     }
 
     override fun swapWindows(first: Window, second: Window): List<TilerCommand> {
@@ -100,7 +110,7 @@ class Tiler(
 
     private fun retile(view: View, windows: Windows, space: LayoutSpace): List<TilerCommand> {
         val windowsInView = view.filterWindowsInView(windows)
-//        view.updateWindowsInView(windowsInView.map { it.id })
+        view.updateWindowsInView(windowsInView.map { it.id })
         val movedWindows = view.layout.retile(windowsInView, space)
         return setPositionOnlyWhenWindowMoved(windows, movedWindows)
     }

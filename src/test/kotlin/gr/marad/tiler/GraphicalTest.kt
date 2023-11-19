@@ -1,5 +1,6 @@
 package gr.marad.tiler
 
+import gh.marad.tiler.app.internal.TilerCommandsExecutorAndWatcher
 import gh.marad.tiler.common.filteringrules.FilteringRules
 import gh.marad.tiler.common.layout.LayoutSpace
 import gh.marad.tiler.os.OsFacade
@@ -59,6 +60,10 @@ val os = object : OsFacade {
         TODO("Not yet implemented")
     }
 
+    override fun isWindowAtPosition(windowId: WindowId, position: WindowPosition): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override fun execute(command: TilerCommand) {
         TODO("Not yet implemented")
     }
@@ -96,7 +101,8 @@ val os = object : OsFacade {
 }
 val config = ConfigFacade.createConfig()
 val tiler = TilerFacade.createTiler(config, os)
-val eventHandler = TilerWindowEventHandler(tiler, filteringRules, os)
+val executor = TilerCommandsExecutorAndWatcher(os, filteringRules)
+val eventHandler = TilerWindowEventHandler(tiler, filteringRules, os, executor)
 
 val xGen2 = Arb.int(0, width -10)
 val yGen2 = Arb.int(0, height -10)
@@ -131,7 +137,7 @@ fun init(windowHandle: Long) {
         if (key == GLFW_KEY_A && action == GLFW_PRESS) {
             val windowID = testIdGen.next()
             val wnd = Window(TestWindowId(windowID), "Name", "class", "exe_path", posGen2.next(),
-                isMinimized = false, isMaximized = false, isPopup = false, isActive = false)
+                isMinimized = false, isMaximized = false, isPopup = false, isActive = false, isVisible = true)
             colors[windowID] = paintGen.next()
             desktopWindows.add(WindowInfo(wnd, false))
              eventHandler.windowAppeared(wnd)

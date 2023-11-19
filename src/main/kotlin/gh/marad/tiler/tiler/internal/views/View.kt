@@ -15,7 +15,7 @@ class View(
 
     fun addWindow(windowId: WindowId) {
         if (!windows.contains(windowId)) {
-            windows.add(windowId)
+            windows.add(0, windowId)
         }
     }
 

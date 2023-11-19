@@ -38,7 +38,7 @@ class ActionHandler(
     }
 
     private fun selectWindow(selector: (Window, Windows) -> Window?) {
-        val visibleWindows = os.listWindows().filterNot { it.isMinimized }
+        val visibleWindows = os.listWindows().filter { it.isVisible }
         val activeWindow = os.activeWindow()
         val window = selector(activeWindow, visibleWindows)
         if (window != null) {
