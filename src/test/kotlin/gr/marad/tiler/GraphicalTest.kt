@@ -84,7 +84,7 @@ val os = object : OsFacade {
                         }
                     }
                 }
-                is MinimizeWindow -> {
+                is HideWindow -> {
                     desktopWindows.replaceAll {
                         if (it.window.id == cmd.windowId) {
                             it.copy(minimized = true)

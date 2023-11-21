@@ -72,9 +72,9 @@ class Tiler(
         viewManager.moveWindow(window.id, viewId)
         val windowToActivate = viewManager.currentView().windowToActivate()
         return if (!viewManager.currentView().hasWindow(os.activeWindow().id) && windowToActivate != null) {
-            (listOf(MinimizeWindow(window.id), ActivateWindow(windowToActivate)) + retile())
+            (listOf(HideWindow(window.id), ActivateWindow(windowToActivate)) + retile())
         } else {
-            (listOf(MinimizeWindow(window.id)) + retile())
+            (listOf(HideWindow(window.id)) + retile())
         }
     }
 
