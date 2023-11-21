@@ -4,10 +4,15 @@ import gh.marad.tiler.actions.ActionsFacade
 import gh.marad.tiler.actions.ReloadConfig
 import gh.marad.tiler.app.AppFacade
 import gh.marad.tiler.common.BroadcastingEventHandler
+import gh.marad.tiler.common.TilerCommand
 import gh.marad.tiler.config.ConfigFacade
 import gh.marad.tiler.config.Hotkey
 import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.tiler.TilerFacade
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.awt.MenuItem
 import java.awt.SystemTray
@@ -24,11 +29,22 @@ class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, va
         actions.registerActionListener(ActionHandler(this, os, tiler))
         val executor = TilerCommandsExecutorAndWatcher(os, config.getFilteringRules())
         executor.execute(tiler.initializeWithOpenWindows())
+        val commandChannel = Channel<List<TilerCommand>>(100)
         val evenHandler = BroadcastingEventHandler(
-            TilerWindowEventHandler(tiler, config.getFilteringRules(), os, executor),
+            TilerWindowEventHandler(tiler, config.getFilteringRules(), os, commandChannel),
             RestoreWindowsOnExitEventHandler(os)
         )
-        os.startEventHandling(evenHandler)
+
+        runBlocking {
+            launch {
+                for (commands in commandChannel) {
+                    executor.execute(commands)
+                }
+            }
+            os.startEventHandling(evenHandler)
+            commandChannel.close()
+            coroutineContext.cancelChildren()
+        }
     }
 
     override fun reloadConfig() {
