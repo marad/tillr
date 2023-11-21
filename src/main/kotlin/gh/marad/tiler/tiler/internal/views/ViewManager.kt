@@ -7,6 +7,9 @@ class ViewManager(private val defaultLayout: () -> Layout) {
     private var _activeViewId: Int = 0
     private val _views = mutableMapOf(0 to View(layout = defaultLayout()))
 
+    val currentViewId: Int
+        get() = _activeViewId
+
     @Suppress("MemberVisibilityCanBePrivate")
     fun getView(viewId: Int): View = _views.getOrPut(viewId) { View(layout = defaultLayout()) }
 
