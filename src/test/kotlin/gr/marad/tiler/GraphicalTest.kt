@@ -15,6 +15,7 @@ import io.kotest.property.Arb
 import io.kotest.property.arbitrary.arbitrary
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.next
+import kotlinx.coroutines.channels.Channel
 import org.jetbrains.skija.*
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
@@ -105,8 +106,7 @@ val os = object : OsFacade {
 }
 val config = ConfigFacade.createConfig(os)
 val tiler = TilerFacade.createTiler(config, os)
-val executor = TilerCommandsExecutorAndWatcher(os, filteringRules)
-val eventHandler = TilerWindowEventHandler(tiler, filteringRules, os, executor)
+val eventHandler = TilerWindowEventHandler(tiler, filteringRules, os, Channel())
 
 val xGen2 = Arb.int(0, width -10)
 val yGen2 = Arb.int(0, height -10)
