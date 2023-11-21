@@ -29,7 +29,7 @@ class ViewSwitcher(private val viewManager: ViewManager, private val filteringRu
             .map { ShowWindow(it.id) }
         val minimizeCommands = view.filterWindowsNotInView(desktopState.getManagableWindows(filteringRules))
             .filterNot { it.isMinimized || !it.isVisible }
-            .map { MinimizeWindow(it.id) }
+            .map { HideWindow(it.id) }
         val windowToActivate = view.windowToActivate()
 
         return (minimizeCommands + showCommands)

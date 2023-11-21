@@ -10,6 +10,6 @@ data class SetWindowPosition(val windowId: WindowId, val position: WindowPositio
 /**
  * Minimizes given window
  */
-data class MinimizeWindow(val windowId: WindowId) : TilerCommand
+data class HideWindow(val windowId: WindowId) : TilerCommand
 data class ShowWindow(val windowId: WindowId) : TilerCommand
 data class ActivateWindow(val windowId: WindowId) : TilerCommand

@@ -71,7 +71,7 @@ class WindowsOs : OsFacade {
                 User32.INSTANCE.SetWindowPlacement(hwnd, placement)
             }
 
-            is MinimizeWindow -> {
+            is HideWindow -> {
                 val hwnd = (command.windowId as WID).handle
                 User32.INSTANCE.ShowWindow(hwnd, User32.SW_HIDE)
             }
