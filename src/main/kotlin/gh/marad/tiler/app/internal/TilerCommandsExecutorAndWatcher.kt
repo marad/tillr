@@ -12,7 +12,9 @@ class TilerCommandsExecutorAndWatcher(
 ) {
     fun execute(commands: List<TilerCommand>) {
         os.execute(commands)
-        excludeWindowsThatDidNotMove(commands)
+
+        // Need to remove this temporarily - it sometimes makes wrong decisions to exclude a window
+        // excludeWindowsThatDidNotMove(commands)
     }
 
     private fun excludeWindowsThatDidNotMove(commands: List<TilerCommand>) {

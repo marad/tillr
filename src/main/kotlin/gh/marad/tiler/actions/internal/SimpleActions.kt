@@ -15,7 +15,7 @@ class SimpleActions : ActionsFacade {
         actionListeners.remove(actionListener)
     }
 
-    override fun invokeAction(action: Action) {
+    override suspend fun invokeAction(action: Action) {
         actionListeners.forEach { it.onAction(action) }
     }
 }

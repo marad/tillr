@@ -164,6 +164,7 @@ class YamlConfig(configPath: String) : ConfigFacade {
                 "LayoutIncrease" -> LayoutIncrease(value.toFloat())
                 "LayoutDecrease" -> LayoutDecrease(value.toFloat())
                 "ReloadConfig" -> ReloadConfig
+                "ToggleManageWindow" -> ToggleManageWindow
                 else -> throw IllegalArgumentException("Unknown action: $actionName")
             }
             hotkeys.add(Hotkey(key, action))

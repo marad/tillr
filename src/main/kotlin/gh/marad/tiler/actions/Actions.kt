@@ -19,3 +19,6 @@ object MoveWindowDown: Action
 
 // config reload
 object ReloadConfig: Action
+
+// toggle window management
+object ToggleManageWindow: Action

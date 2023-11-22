@@ -9,10 +9,8 @@ import gh.marad.tiler.config.ConfigFacade
 import gh.marad.tiler.config.Hotkey
 import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.tiler.TilerFacade
-import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.awt.MenuItem
 import java.awt.SystemTray
@@ -21,21 +19,21 @@ import java.awt.TrayIcon
 
 class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, val actions: ActionsFacade) : AppFacade {
     private val logger = LoggerFactory.getLogger(App::class.java)
+    private val commandChannel = Channel<List<TilerCommand>>(100)
 
     @Suppress("UNUSED_VARIABLE")
-    override fun start() {
-        val trayIcon = createTrayIcon(os, tiler, actions)
+    override suspend fun start() {
+        val trayIcon = createTrayIcon(commandChannel, tiler, actions)
         setupHotkeys(config.getHotkeys())
-        actions.registerActionListener(ActionHandler(this, os, tiler))
+        actions.registerActionListener(ActionHandler(this, os, tiler, config.getFilteringRules(), commandChannel))
         val executor = TilerCommandsExecutorAndWatcher(os, config.getFilteringRules())
-        executor.execute(tiler.initializeWithOpenWindows())
-        val commandChannel = Channel<List<TilerCommand>>(100)
+        commandChannel.send(tiler.initializeWithOpenWindows())
         val evenHandler = BroadcastingEventHandler(
             TilerWindowEventHandler(tiler, config.getFilteringRules(), os, commandChannel),
             RestoreWindowsOnExitEventHandler(os)
         )
 
-        runBlocking {
+        coroutineScope {
             launch {
                 for (commands in commandChannel) {
                     executor.execute(commands)
@@ -47,26 +45,28 @@ class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, va
         }
     }
 
-    override fun reloadConfig() {
+    override suspend fun reloadConfig() {
         logger.info("Reloading config...")
         config.reload()
         logger.info("Updating hotkeys...")
         os.clearHotkeys()
         setupHotkeys(config.getHotkeys())
         logger.info("Hotkeys updated...")
-        os.execute(tiler.retile())
+        commandChannel.send(tiler.retile())
         logger.info("Config reloaded!")
     }
 
     private fun setupHotkeys(hotkeys: List<Hotkey>) {
         hotkeys.forEach { hotkey ->
             os.registerHotkey(hotkey.key) {
-                actions.invokeAction(hotkey.action)
+                runBlocking(Dispatchers.IO) {
+                    actions.invokeAction(hotkey.action)
+                }
             }
         }
     }
 
-    private fun createTrayIcon(os: OsFacade, tiler: TilerFacade, actions: ActionsFacade): TrayIcon {
+    private fun createTrayIcon(commandChannel: Channel<List<TilerCommand>>, tiler: TilerFacade, actions: ActionsFacade): TrayIcon {
         val icon = Toolkit.getDefaultToolkit().getImage(AppFacade::class.java.getResource("/icon.png"))
         val stopped = Toolkit.getDefaultToolkit().getImage(AppFacade::class.java.getResource("/stopped_icon.png"))
         val trayIcon = TrayIcon(icon, "Tiler")
@@ -82,7 +82,9 @@ class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, va
                     if (trayIcon.image == stopped) {
                         trayIcon.image = icon
                         tiler.enabled = true
-                        os.execute(tiler.retile())
+                        runBlocking(Dispatchers.IO) {
+                            commandChannel.send(tiler.retile())
+                        }
                     } else {
                         trayIcon.image = stopped
                         tiler.enabled = false
@@ -98,7 +100,9 @@ class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, va
                 editor.start()
             }
             popupMenu.add(MenuItem("Reload config")).addActionListener {
-                actions.invokeAction(ReloadConfig)
+                runBlocking(Dispatchers.IO) {
+                    actions.invokeAction(ReloadConfig)
+                }
             }
             popupMenu.addSeparator()
         }

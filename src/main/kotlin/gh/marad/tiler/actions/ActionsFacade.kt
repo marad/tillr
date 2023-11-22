@@ -6,7 +6,7 @@ interface ActionsFacade {
     fun registerActionListener(actionListener: ActionListener)
     fun removeActionListener(actionListener: ActionListener)
 
-    fun invokeAction(action: Action)
+    suspend fun invokeAction(action: Action)
 
     companion object {
         fun createActions(): ActionsFacade = SimpleActions()
