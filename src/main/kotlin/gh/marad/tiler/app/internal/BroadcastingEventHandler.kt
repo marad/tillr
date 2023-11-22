@@ -1,5 +1,6 @@
-package gh.marad.tiler.common
+package gh.marad.tiler.app.internal
 
+import gh.marad.tiler.common.Window
 import gh.marad.tiler.os.WindowEventHandler
 
 class BroadcastingEventHandler(private vararg val handlers: WindowEventHandler) : WindowEventHandler{

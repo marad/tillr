@@ -3,7 +3,6 @@ package gh.marad.tiler.app.internal
 import gh.marad.tiler.actions.ActionsFacade
 import gh.marad.tiler.actions.ReloadConfig
 import gh.marad.tiler.app.AppFacade
-import gh.marad.tiler.common.BroadcastingEventHandler
 import gh.marad.tiler.common.TilerCommand
 import gh.marad.tiler.config.ConfigFacade
 import gh.marad.tiler.config.Hotkey
