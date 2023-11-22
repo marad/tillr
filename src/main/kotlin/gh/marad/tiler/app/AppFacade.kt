@@ -7,8 +7,8 @@ import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.tiler.TilerFacade
 
 interface AppFacade {
-    fun start()
-    fun reloadConfig()
+    suspend fun start()
+    suspend fun reloadConfig()
 
     companion object {
         fun createWindowsApp(config: ConfigFacade, os: OsFacade, tiling: TilerFacade, actions: ActionsFacade): AppFacade {

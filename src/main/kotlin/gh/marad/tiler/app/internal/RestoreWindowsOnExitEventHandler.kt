@@ -19,27 +19,27 @@ class RestoreWindowsOnExitEventHandler(os: OsFacade) : WindowEventHandler {
         Runtime.getRuntime().addShutdownHook(shutdownHook)
     }
 
-    override fun windowActivated(window: Window) {
+    override suspend fun windowActivated(window: Window) {
         windows.add(window.id)
     }
 
-    override fun windowAppeared(window: Window) {
+    override suspend fun windowAppeared(window: Window) {
         windows.add(window.id)
     }
 
-    override fun windowDisappeared(window: Window) {
+    override suspend fun windowDisappeared(window: Window) {
         windows.add(window.id)
     }
 
-    override fun windowMinimized(window: Window) {
+    override suspend fun windowMinimized(window: Window) {
         windows.add(window.id)
     }
 
-    override fun windowRestored(window: Window) {
+    override suspend fun windowRestored(window: Window) {
         windows.add(window.id)
     }
 
-    override fun windowMovedOrResized(window: Window) {
+    override suspend fun windowMovedOrResized(window: Window) {
         windows.add(window.id)
     }
 }

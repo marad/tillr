@@ -4,6 +4,8 @@ import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.platform.win32.WinUser
 import gh.marad.tiler.os.WindowEventHandler
 import gh.marad.tiler.os.internal.winapi.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 
 val ignoredEvents = arrayOf(
@@ -23,22 +25,28 @@ fun generateEventProcedure(eventHandler: WindowEventHandler): WinUser.WinEventPr
         }
 
         try {
-            when (event) {
-                EVENT_SYSTEM_FOREGROUND -> eventHandler.windowActivated(window.toTilerWindow())
-                EVENT_OBJECT_FOCUS -> {}
-                EVENT_OBJECT_SHOW -> eventHandler.windowAppeared(window.toTilerWindow())
-                EVENT_OBJECT_DESTROY -> eventHandler.windowDisappeared(window.toTilerWindow())
-                EVENT_OBJECT_HIDE -> eventHandler.windowDisappeared(window.toTilerWindow())
-                EVENT_SYSTEM_MINIMIZESTART -> eventHandler.windowMinimized(window.toTilerWindow())
-                EVENT_SYSTEM_MINIMIZEEND -> eventHandler.windowRestored(window.toTilerWindow())
-                EVENT_SYSTEM_MOVESIZESTART -> {}
-                EVENT_SYSTEM_MOVESIZEEND -> {
-                    eventHandler.windowMovedOrResized(window.toTilerWindow())
-                }
+            runBlocking(Dispatchers.IO) {
+                when (event) {
+                    EVENT_SYSTEM_FOREGROUND -> eventHandler.windowActivated(window.toTilerWindow())
+                    EVENT_OBJECT_FOCUS -> {}
+                    EVENT_OBJECT_SHOW -> eventHandler.windowAppeared(window.toTilerWindow())
+                    EVENT_OBJECT_DESTROY -> eventHandler.windowDisappeared(window.toTilerWindow())
+                    EVENT_OBJECT_HIDE -> eventHandler.windowDisappeared(window.toTilerWindow())
+                    EVENT_SYSTEM_MINIMIZESTART -> eventHandler.windowMinimized(window.toTilerWindow())
+                    EVENT_SYSTEM_MINIMIZEEND -> eventHandler.windowRestored(window.toTilerWindow())
+                    EVENT_SYSTEM_MOVESIZESTART -> {}
+                    EVENT_SYSTEM_MOVESIZEEND -> {
+                        eventHandler.windowMovedOrResized(window.toTilerWindow())
+                    }
 
-                else -> {}
+                    else -> {}
+                }
             }
-        } catch (e: Exception) {
+        }
+        catch (_: CannotGetWindowPositionException) {
+            // ignore this exception
+        }
+        catch (e: Exception) {
             val logger = LoggerFactory.getLogger("generateEventProcedure")
             logger.error("Error while handling event $event for window $window", e)
         }
@@ -53,14 +61,12 @@ fun shouldIgnoreEvent(
 ): Boolean {
     val isNotForWindow = idObject != OBJID_WINDOW
     val isNotAWindow = !window.isWindow()
-    val isNotVisibleAndIsNotTryingToHide = !window.isVisible() && event != EVENT_OBJECT_HIDE
     val isCloaked = DwmApi.isCloaked(hwnd)
     val isWindowsTooltip = window.getRealClassName() == "Xaml_WindowedPopupClass"
     val isAToolWindow = window.getExStyle().toolWindow()
 
     return isNotForWindow ||
             isNotAWindow ||
-            isNotVisibleAndIsNotTryingToHide ||
             isCloaked ||
             isWindowsTooltip ||
             isAToolWindow

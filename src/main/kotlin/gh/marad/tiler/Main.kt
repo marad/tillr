@@ -4,6 +4,8 @@ import gh.marad.tiler.app.AppFacade
 import gh.marad.tiler.config.ConfigException
 import gh.marad.tiler.config.ConfigFacade
 import gh.marad.tiler.os.OsFacade
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.docopt.Docopt
 import org.slf4j.LoggerFactory
 
@@ -29,7 +31,9 @@ fun main(args: Array<String>) {
     try {
         val config = getConfig(data)
         val app = AppFacade.createAppWithConfig(config)
-        app.start()
+        runBlocking(Dispatchers.IO) {
+            app.start()
+        }
     } catch (ex: ConfigException) {
         logger.error("Configuration error: ${ex.message}")
     } catch (ex: Throwable) {
