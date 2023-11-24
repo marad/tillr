@@ -50,7 +50,9 @@ class FilteringRules {
             Rule.ignoreIf { it.isPopup },
             Rule.ignoreIf { it.exeName == "idea64.exe" && it.windowName.isBlank() },
             Rule.ignoreIf { it.exeName == "PowerToys.MeasureToolUI.exe" || it.exeName == "PowerToys.Settings.exe" },
-            Rule.ignoreIf { it.windowName == "PopupMessageWindow" }
+            Rule.ignoreIf { it.windowName == "PopupMessageWindow" },
+            Rule.ignoreIf { it.exeName == "explorer.exe" },
+            Rule.manageIf { it.exeName == "explorer.exe" && it.className == "CabinetWClass" }
         )
     }
 }
