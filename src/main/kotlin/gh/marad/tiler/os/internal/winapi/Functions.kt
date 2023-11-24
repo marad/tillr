@@ -30,6 +30,7 @@ fun listWindows(): List<Window> {
             && isNotCloaked
             && isNotATaskManager
             && win.isWindow()
+            && win.getTitle().isNotEmpty()
         ) {
             windows.add(win)
         }
