@@ -6,6 +6,7 @@ import gh.marad.tiler.app.AppFacade
 import gh.marad.tiler.common.TilerCommand
 import gh.marad.tiler.config.ConfigFacade
 import gh.marad.tiler.config.Hotkey
+import gh.marad.tiler.help.WindowInspector
 import gh.marad.tiler.os.OsFacade
 import gh.marad.tiler.tiler.TilerFacade
 import kotlinx.coroutines.*
@@ -19,6 +20,7 @@ import java.awt.TrayIcon
 class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, val actions: ActionsFacade) : AppFacade {
     private val logger = LoggerFactory.getLogger(App::class.java)
     private val commandChannel = Channel<List<TilerCommand>>(100)
+    private val windowInspector = WindowInspector(os)
 
     @Suppress("UNUSED_VARIABLE")
     override suspend fun start() {
@@ -29,7 +31,8 @@ class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, va
         commandChannel.send(tiler.initializeWithOpenWindows())
         val evenHandler = BroadcastingEventHandler(
             TilerWindowEventHandler(tiler, config.getFilteringRules(), os, commandChannel),
-            RestoreWindowsOnExitEventHandler(os)
+            RestoreWindowsOnExitEventHandler(os),
+            windowInspector
         )
 
         coroutineScope {
@@ -93,6 +96,11 @@ class App(val config: ConfigFacade, val os: OsFacade, val tiler: TilerFacade, va
         })
 
         val popupMenu = java.awt.PopupMenu()
+        popupMenu.add(MenuItem("Window inspector")).addActionListener {
+            windowInspector.isVisible = true
+        }
+        popupMenu.addSeparator()
+
         if (config.getConfigPath() != null) {
             popupMenu.add(MenuItem("Edit config")).addActionListener {
                 val editor = ProcessBuilder(config.configEditorPath(), config.getConfigPath())
