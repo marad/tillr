@@ -59,12 +59,7 @@ class Tiler(
 
     override fun removeWindow(window: Window): List<TilerCommand> {
         viewManager.currentView().removeWindow(window.id)
-        val windowToActivate = viewManager.currentView().windowToActivate()
-        return if (!viewManager.currentView().hasWindow(os.activeWindow().id) && windowToActivate != null) {
-            retile() + ActivateWindow(windowToActivate)
-        } else {
-            retile()
-        }
+        return retile()
     }
 
     override fun moveWindow(window: TilerWindow, viewId: Int): List<TilerCommand> {

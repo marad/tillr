@@ -21,22 +21,27 @@ fun listWindows(): List<Window> {
     val windows = mutableListOf<Window>()
     u32.EnumWindows({ handle: HWND, data: Pointer? ->
         val win = Window(handle)
-        val isNotCloaked = !DwmApi.isCloaked(handle)
-        val isNotAToolWindow = !win.getExStyle().toolWindow()
-        val isNotATaskManager = win.getRealClassName() != "TaskManagerWindow"
-
-        if (
-            isNotAToolWindow
-            && isNotCloaked
-            && isNotATaskManager
-            && win.isWindow()
-        ) {
+        if (isInterestingWindow(win)) {
             windows.add(win)
         }
         true
     }, null)
     return windows
 }
+
+ fun isInterestingWindow(win: Window): Boolean {
+     val isNotCloaked = !DwmApi.isCloaked(win.handle)
+     val isNotAToolWindow = !win.getExStyle().toolWindow()
+     val isNotATaskManager = win.getRealClassName() != "TaskManagerWindow"
+     val isNotAWindowsTooltop = win.getRealClassName() != "Xaml_WindowedPopupClass"
+
+     return isNotAToolWindow
+             && isNotCloaked
+             && isNotATaskManager
+             && isNotAWindowsTooltop
+             && win.isWindow()
+             && win.getTitle().isNotEmpty()
+ }
 
 fun windowsUnderCursor(): List<Window> {
     val cursor = POINT()
