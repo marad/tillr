@@ -20,7 +20,7 @@ fun generateEventProcedure(eventHandler: WindowEventHandler): WinUser.WinEventPr
 
         val window = Window(hwnd)
 
-        if(shouldIgnoreEvent(window, event, hwnd, idObject)) {
+        if(shouldIgnoreEvent(window, idObject)) {
             return@WinEventProc
         }
 
@@ -55,19 +55,8 @@ fun generateEventProcedure(eventHandler: WindowEventHandler): WinUser.WinEventPr
 
 fun shouldIgnoreEvent(
     window: Window,
-    event: WinDef.DWORD?,
-    hwnd: WinDef.HWND,
     idObject: WinDef.LONG?
 ): Boolean {
     val isNotForWindow = idObject != OBJID_WINDOW
-    val isNotAWindow = !window.isWindow()
-    val isCloaked = DwmApi.isCloaked(hwnd)
-    val isWindowsTooltip = window.getRealClassName() == "Xaml_WindowedPopupClass"
-    val isAToolWindow = window.getExStyle().toolWindow()
-
-    return isNotForWindow ||
-            isNotAWindow ||
-            isCloaked ||
-            isWindowsTooltip ||
-            isAToolWindow
+    return isNotForWindow || !isInterestingWindow(window)
 }
